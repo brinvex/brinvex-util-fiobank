@@ -39,7 +39,7 @@ PortfolioPeriod ptf = svc.processStatements(List.of(
   - taxes
   - transformations
 
-![Datamodel diagram](diagrams/datamodel_1.png)
+![Datamodel diagram](diagrams/datamodel_5.png)
 
 - If you prefer just raw Java object reflecting Fio transaction report structure use
 ````
@@ -49,9 +49,7 @@ PortfolioPeriod ptf = svc.parseStatements(List.of(
     "c:/tmp/Fio_Broker_Transactions_2022_CZ.csv",   
 ));
 ````
-
-
-![Datamodel diagram](diagrams/datamodel_2.png)
+![Datamodel diagram](diagrams/datamodel_4.png)
 
 ### Requirements
 - Java 11 or above
