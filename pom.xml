@@ -24,7 +24,7 @@
     <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>${project.groupId}:${project.artifactId}</name>
+    <name>Brinvex Fiobank Utils</name>
     <description>
         Brinvex-Util-Fiobank is a compact Java library which enables developers
         to easily extract and work with data from Fio Bank brokerage account reports.
@@ -154,6 +154,7 @@
                                         <exclude>src/main/resources/**</exclude>
                                         <exclude>src/test/resources/**</exclude>
                                         <exclude>**/.gitignore</exclude>
+                                        <exclude>**/changelog.txt</exclude>
                                         <exclude>**/.LICENSE</exclude>
                                         <exclude>**/.README</exclude>
                                     </excludes>

@@ -11,12 +11,12 @@ _Brinvex FioBank Utils_ is a compact Java library which enables developers to ea
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-fiobank-api</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-fiobank-impl</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <scope>runtime</scope>
 </dependency>
 ````
