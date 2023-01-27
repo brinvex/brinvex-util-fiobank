@@ -164,6 +164,14 @@ public class Transaction implements Serializable {
         this.bunchId = bunchId;
     }
 
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
     @Override
     public String toString() {
         return "Transaction{" +
@@ -182,13 +190,5 @@ public class Transaction implements Serializable {
                ", settlementDate=" + settlementDate +
                ", bunchId='" + bunchId + '\'' +
                '}';
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
     }
 }
