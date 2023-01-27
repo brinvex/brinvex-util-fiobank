@@ -1036,12 +1036,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                 tran.getVolumeUsd(),
                 tran.getFeesUsd(),
                 tran.getVolumeEur(),
-                tran.getFeesEur(),
-                tran.getSettlementDate(),
-                tran.getText(),
-                tran.getInstrumentName(),
-                tran.getOrderId(),
-                tran.getUserComments()
+                tran.getFeesEur()
         );
     }
 

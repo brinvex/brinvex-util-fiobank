@@ -104,6 +104,27 @@ class FiobankBrokerServiceTest {
     }
 
     @Test
+    void parseStatements_duplicate() {
+        List<String> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
+                fileName.endsWith("Fio_Broker_Transactions_2019.csv") ||
+                fileName.endsWith("Fio_Broker_Transactions_2020.csv")
+        );
+        List<String> testFilePaths2 = testHelper.getTestFilePaths(fileName ->
+                fileName.endsWith("Fio_Broker_Transactions_2020_SK.csv") ||
+                fileName.endsWith("Fio_Broker_Transactions_2019_SK.csv")
+        );
+        if (!testFilePaths1.isEmpty() && !testFilePaths2.isEmpty()) {
+
+            RawTransactionList tranList1 = fiobankSvc.parseStatements(testFilePaths1);
+
+            testFilePaths2.addAll(testFilePaths1);
+            RawTransactionList tranList2 = fiobankSvc.parseStatements(testFilePaths2);
+
+            assertEquals(tranList1.getTransactions().size(), tranList2.getTransactions().size());
+        }
+    }
+
+    @Test
     void processStatements_lang() {
         List<String> testFilePathsEn = testHelper.getTestFilePaths(f ->
                 f.equals("Fio_Broker_Transactions_2019_EN.csv") ||
@@ -211,12 +232,22 @@ class FiobankBrokerServiceTest {
 
     @Test
     void processStatements_duplicate() {
-        List<String> testFilePaths = testHelper.getTestFilePaths(fileName -> fileName.endsWith("SK.csv"));
-        if (!testFilePaths.isEmpty()) {
-            String testFilePath = testFilePaths.get(0);
-            Portfolio ptf1 = fiobankSvc.processStatements(List.of(testFilePath));
-            Portfolio ptf2 = fiobankSvc.processStatements(List.of(testFilePath, testFilePath));
+        List<String> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
+                fileName.endsWith("Fio_Broker_Transactions_2019.csv") ||
+                fileName.endsWith("Fio_Broker_Transactions_2020.csv")
+        );
+        List<String> testFilePaths2 = testHelper.getTestFilePaths(fileName ->
+                fileName.endsWith("Fio_Broker_Transactions_2020_SK.csv") ||
+                fileName.endsWith("Fio_Broker_Transactions_2019_SK.csv")
+        );
+        if (!testFilePaths1.isEmpty() && !testFilePaths2.isEmpty()) {
+            Portfolio ptf1 = fiobankSvc.processStatements(testFilePaths1);
+
+            testFilePaths2.addAll(testFilePaths1);
+            Portfolio ptf2 = fiobankSvc.processStatements(testFilePaths2);
+
             assertEquals(ptf1.getTransactions().size(), ptf2.getTransactions().size());
         }
     }
+
 }
