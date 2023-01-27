@@ -36,4 +36,8 @@ public interface FiobankBrokerService {
 
     Portfolio processStatements(Collection<String> statementFilePaths);
 
+    Portfolio processStatements(Portfolio ptf, Stream<String> statementContents);
+
+    Portfolio processStatements(Portfolio ptf, Collection<String> statementFilePaths);
+
 }

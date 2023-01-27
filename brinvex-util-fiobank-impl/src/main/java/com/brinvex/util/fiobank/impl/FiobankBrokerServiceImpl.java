@@ -135,8 +135,8 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
 
             LocalDate nextPeriodFrom = result.getPeriodTo().plusDays(1);
             if (nextPeriodFrom.isBefore(periodFrom)) {
-                throw new FiobankServiceException(format("accountNumber=%s, missingPeriod='%s - %s'",
-                        accountNumber0, nextPeriodFrom, periodFrom.minusDays(1)));
+                throw new FiobankServiceException(format("Missing period: '%s - %s', accountNumber=%s",
+                        nextPeriodFrom, periodFrom.minusDays(1), accountNumber0));
             }
             if (periodTo.isAfter(result.getPeriodTo())) {
                 result.setPeriodTo(periodTo);
@@ -166,16 +166,38 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
 
     @Override
     @SuppressWarnings("DuplicatedCode")
-    public Portfolio processStatements(Stream<String> statementContents) {
+    public Portfolio processStatements(Portfolio ptf, Stream<String> statementContents) {
         RawTransactionList rawTranList = parseStatements(statementContents);
-
-        Portfolio ptf = ptfmanager.initPortfolio(
-                rawTranList.getAccountNumber(),
-                rawTranList.getPeriodFrom(),
-                rawTranList.getPeriodTo()
-        );
-
         List<RawTransaction> rawTrans = rawTranList.getTransactions();
+
+        String accountNumber = rawTranList.getAccountNumber();
+        LocalDate periodFrom = rawTranList.getPeriodFrom();
+        LocalDate periodTo = rawTranList.getPeriodTo();
+        if (ptf == null) {
+            ptf = ptfmanager.initPortfolio(accountNumber, periodFrom, periodTo);
+        } else {
+            if (!accountNumber.equals(ptf.getAccountNumber())) {
+                throw new FiobankServiceException(format("Unexpected multiple accounts: %s, %s",
+                        ptf.getAccountNumber(),
+                        accountNumber
+                ));
+            }
+            LocalDate nextPeriodFrom = ptf.getPeriodTo().plusDays(1);
+            if (nextPeriodFrom.isBefore(periodFrom)) {
+                throw new FiobankServiceException(format("Missing period: '%s - %s', accountNumber=%s",
+                        nextPeriodFrom, periodFrom.minusDays(1), accountNumber));
+            }
+            if (periodTo.isAfter(ptf.getPeriodTo())) {
+                ptf.setPeriodTo(periodTo);
+            }
+            List<Transaction> ptfTrans = ptf.getTransactions();
+            if (!ptfTrans.isEmpty()) {
+                Transaction lastPtfTran = ptfTrans.get(ptfTrans.size() - 1);
+                LocalDateTime lastPtfTranDate = lastPtfTran.getDate().toLocalDateTime();
+                rawTrans.removeIf(t -> !t.getTradeDate().isAfter(lastPtfTranDate));
+            }
+        }
+
         LinkedList<Transaction> newTrans = new LinkedList<>();
         for (int i = 0, rawTransSize = rawTrans.size(); i < rawTransSize; i++) {
             RawTransaction rawTran = rawTrans.get(i);
@@ -237,6 +259,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     }
                 }
 
+                List<Transaction> trans = ptf.getTransactions();
                 Function<TransactionType, Transaction> tranInitializer = tType -> {
                     Transaction t = new Transaction();
                     t.setType(tType);
@@ -250,7 +273,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     t.setIncome(ZERO);
                     t.setFees(ZERO);
                     t.setTax(ZERO);
-                    ptf.getTransactions().add(t);
+                    trans.add(t);
                     newTrans.add(t);
                     return t;
                 };
@@ -816,12 +839,26 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
     }
 
     @Override
-    public Portfolio processStatements(Collection<String> statementFilePaths) {
-        return processStatements(statementFilePaths
+    public Portfolio processStatements(Portfolio ptf, Collection<String> statementFilePaths) {
+        Stream<String> statementContentStream = statementFilePaths
                 .stream()
                 .map(Path::of)
-                .map(filePath -> IOUtil.readTextFileContent(filePath, LazyHolder.DEFAULT_CHARSET, StandardCharsets.UTF_8))
-        );
+                .map(filePath -> IOUtil.readTextFileContent(filePath, LazyHolder.DEFAULT_CHARSET, StandardCharsets.UTF_8));
+        return processStatements(ptf, statementContentStream);
+    }
+
+    @Override
+    public Portfolio processStatements(Collection<String> statementFilePaths) {
+        Stream<String> statementContentStream = statementFilePaths
+                .stream()
+                .map(Path::of)
+                .map(filePath -> IOUtil.readTextFileContent(filePath, LazyHolder.DEFAULT_CHARSET, StandardCharsets.UTF_8));
+        return processStatements(statementContentStream);
+    }
+
+    @Override
+    public Portfolio processStatements(Stream<String> statementContents) {
+        return processStatements(null, statementContents);
     }
 
     @SuppressWarnings({"SpellCheckingInspection", "DuplicatedCode", "RedundantIfStatement"})

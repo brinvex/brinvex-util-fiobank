@@ -19,18 +19,22 @@ import com.brinvex.util.fiobank.api.model.Portfolio;
 import com.brinvex.util.fiobank.api.model.Position;
 import com.brinvex.util.fiobank.api.model.RawTransaction;
 import com.brinvex.util.fiobank.api.model.RawTransactionList;
+import com.brinvex.util.fiobank.api.model.Transaction;
 import com.brinvex.util.fiobank.api.service.FiobankBrokerService;
 import com.brinvex.util.fiobank.api.service.FiobankServiceFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class FiobankBrokerServiceTest {
 
@@ -159,6 +163,49 @@ class FiobankBrokerServiceTest {
                     .peek(p -> p.getTransactions().clear())
                     .collect(Collectors.toList());
             testHelper.assertJsonEquals(expectedPtf.getPositions(), positions);
+        }
+    }
+
+    @Test
+    void processStatements_iterative() {
+        List<String> transFilePaths = new ArrayList<>(testHelper.getTestFilePaths(
+                fileName -> fileName.endsWith("Fio_Broker_Transactions_2019_SK.csv")
+                            || fileName.endsWith("Fio_Broker_Transactions_2020_SK.csv")
+                            || fileName.endsWith("Fio_Broker_Transactions_2021_SK.csv")
+                            || fileName.endsWith("Fio_Broker_Transactions_2022_SK.csv")
+        ));
+        if (!transFilePaths.isEmpty()) {
+            Portfolio ptf1 = fiobankSvc.processStatements(transFilePaths);
+
+            Portfolio ptf2 = null;
+            transFilePaths.sort(naturalOrder());
+            for (String transFilePath : transFilePaths) {
+                ptf2 = fiobankSvc.processStatements(ptf2, List.of(transFilePath));
+            }
+
+            assertNotNull(ptf2);
+            assertEquals(ptf2.getAccountNumber(), ptf1.getAccountNumber());
+            assertEquals(ptf2.getCash(), ptf1.getCash());
+            assertEquals(ptf2.getPeriodFrom(), ptf1.getPeriodFrom());
+            assertEquals(ptf2.getPeriodTo(), ptf1.getPeriodTo());
+
+            List<Position> positions1 = ptf1.getPositions()
+                    .stream()
+                    .sorted(comparing(Position::getSymbol))
+                    .peek(p -> p.getTransactions().clear())
+                    .collect(Collectors.toList());
+            List<Position> positions2 = ptf2.getPositions()
+                    .stream()
+                    .sorted(comparing(Position::getSymbol))
+                    .peek(p -> p.getTransactions().clear())
+                    .collect(Collectors.toList());
+            testHelper.assertJsonEquals(positions2, positions1);
+
+            List<Transaction> trans1 = ptf2.getTransactions();
+            List<Transaction> trans2 = ptf1.getTransactions();
+            trans1.forEach(t -> t.setBunchId(null));
+            trans2.forEach(t -> t.setBunchId(null));
+            testHelper.assertJsonEquals(trans1, trans2);
         }
     }
 
