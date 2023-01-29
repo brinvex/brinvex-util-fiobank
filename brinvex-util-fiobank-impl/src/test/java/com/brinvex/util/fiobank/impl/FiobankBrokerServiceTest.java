@@ -20,6 +20,7 @@ import com.brinvex.util.fiobank.api.model.Position;
 import com.brinvex.util.fiobank.api.model.RawTransaction;
 import com.brinvex.util.fiobank.api.model.RawTransactionList;
 import com.brinvex.util.fiobank.api.model.Transaction;
+import com.brinvex.util.fiobank.api.model.TransactionType;
 import com.brinvex.util.fiobank.api.service.FiobankBrokerService;
 import com.brinvex.util.fiobank.api.service.FiobankServiceFactory;
 import org.junit.jupiter.api.AfterAll;
@@ -35,6 +36,7 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FiobankBrokerServiceTest {
 
@@ -247,6 +249,24 @@ class FiobankBrokerServiceTest {
             Portfolio ptf2 = fiobankSvc.processStatements(testFilePaths2);
 
             assertEquals(ptf1.getTransactions().size(), ptf2.getTransactions().size());
+        }
+    }
+
+    @Test
+    void processStatements_adr() {
+        List<String> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
+                fileName.endsWith("Fio_Broker_Transactions_2019.csv")        );
+        if (!testFilePaths1.isEmpty()) {
+            Portfolio ptf1 = fiobankSvc.processStatements(testFilePaths1);
+
+            for (Transaction t : ptf1.getTransactions()) {
+                if (t.getType().equals(TransactionType.FEE)) {
+                    if (t.getText().contains("ADR")) {
+                        assertNotNull(t.getSymbol());
+                        assertNotNull(t.getCountry());
+                    }
+                }
+            }
         }
     }
 

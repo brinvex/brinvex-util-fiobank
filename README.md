@@ -2,7 +2,7 @@
 
 ## Introduction
 
-_Brinvex FioBank Utils_ is a compact Java library which enables developers to easily work with Fiobank E&#x2011;Broker data.
+_Brinvex Fiobank Utils_ is a compact Java library which enables developers to easily work with Fiobank E&#x2011;Broker data.
 
 ## How to use it
 
@@ -56,4 +56,4 @@ PortfolioPeriod ptf = svc.parseStatements(List.of(
 
 ### License
 
-- The _Brinvex FioBank Utils_ is released under version 2.0 of the Apache License.
+- The _Brinvex Fiobank Utils_ is released under version 2.0 of the Apache License.
