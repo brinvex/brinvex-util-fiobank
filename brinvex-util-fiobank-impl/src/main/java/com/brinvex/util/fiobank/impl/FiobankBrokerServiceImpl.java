@@ -272,7 +272,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     t.setQty(ZERO);
                     t.setIncome(ZERO);
                     t.setFees(ZERO);
-                    t.setTax(ZERO);
+                    t.setTax(null);
                     trans.add(t);
                     newTrans.add(t);
                     return t;
@@ -402,7 +402,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     assertIsPositive(rawValue);
                     assertIsZero(fees);
 
-                    BigDecimal tax = ZERO;
+                    BigDecimal tax = null;
                     BigDecimal grossValue = rawValue;
                     if (TransactionType.TAX.equals(nextTranType) && symbol.equals(nextSymbol)) {
                         assertEqual(ccy, nextCcy);
@@ -437,7 +437,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
 
                     Transaction t = tranInitializer.apply(TransactionType.CASH_DIVIDEND);
                     t.setGrossValue(grossValue);
-                    t.setNetValue(grossValue.add(tax).add(fees));
+                    t.setNetValue(grossValue.add(requireNonNullElse(tax, ZERO)).add(fees));
                     t.setCountry(country);
                     t.setSymbol(symbol);
                     t.setIncome(grossValue);

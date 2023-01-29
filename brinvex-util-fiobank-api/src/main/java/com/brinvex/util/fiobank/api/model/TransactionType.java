@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static java.math.BigDecimal.ZERO;
+import static java.util.Objects.requireNonNullElse;
 
 @SuppressWarnings({"UnnecessaryLocalVariable", "DuplicatedCode"})
 public enum TransactionType {
@@ -35,7 +36,7 @@ public enum TransactionType {
                     t -> t.getPrice().compareTo(ZERO) > 0,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -50,7 +51,7 @@ public enum TransactionType {
                     t -> t.getPrice().compareTo(ZERO) > 0,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
-                    t -> t.getTax().compareTo(ZERO) <= 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) <= 0
             );
         }
     },
@@ -65,7 +66,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) > 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -80,7 +81,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) < 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -95,7 +96,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) > 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
-                    t -> t.getTax().compareTo(ZERO) <= 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) <= 0
             );
         }
     },
@@ -110,7 +111,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) > 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -124,7 +125,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) >= 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -139,7 +140,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) < 0,
                     t -> t.getFees().compareTo(ZERO) >= 0,
-                    t -> t.getTax().compareTo(ZERO) >= 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) >= 0
             );
         }
     },
@@ -154,7 +155,7 @@ public enum TransactionType {
                     t -> t.getPrice().compareTo(ZERO) > 0,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -169,7 +170,7 @@ public enum TransactionType {
                     t -> t.getPrice().compareTo(ZERO) > 0,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -184,7 +185,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) < 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -229,7 +230,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) > 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -245,7 +246,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -261,7 +262,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -277,7 +278,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -293,7 +294,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -309,7 +310,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) != 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -325,7 +326,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -339,7 +340,7 @@ public enum TransactionType {
                     t -> t.getPrice().compareTo(ZERO) == 0,
                     t -> t.getIncome().compareTo(ZERO) >= 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -355,7 +356,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
@@ -371,7 +372,7 @@ public enum TransactionType {
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
-                    t -> t.getTax().compareTo(ZERO) == 0
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     };
@@ -440,7 +441,7 @@ public enum TransactionType {
         BigDecimal price = t.getPrice();
         BigDecimal income = t.getIncome();
         BigDecimal fees = t.getFees();
-        BigDecimal tax = t.getTax();
+        BigDecimal tax = requireNonNullElse(t.getTax(), ZERO);
         BigDecimal compNetValue;
         if (price == null) {
             compNetValue = income.add(fees).add(tax);
