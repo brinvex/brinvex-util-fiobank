@@ -180,7 +180,6 @@ public enum TransactionType {
             return List.of(
                     t -> t.getNetValue().compareTo(ZERO) < 0,
                     t -> t.getCurrency() != null,
-                    t -> t.getSymbol() == null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) == 0,

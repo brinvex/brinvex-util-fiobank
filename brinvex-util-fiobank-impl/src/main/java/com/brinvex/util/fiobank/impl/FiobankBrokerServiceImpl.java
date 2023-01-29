@@ -548,6 +548,8 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     t.setGrossValue(ZERO);
                     t.setNetValue(value);
                     t.setFees(value);
+                    t.setSymbol(symbol);
+                    t.setCountry(country);
                 } else if (tranType == TransactionType.RECLAMATION) {
                     assertNull(direction);
                     assertNull(symbol);
