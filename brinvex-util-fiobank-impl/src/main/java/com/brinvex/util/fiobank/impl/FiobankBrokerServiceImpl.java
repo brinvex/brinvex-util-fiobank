@@ -759,15 +759,18 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
 
                     assertNull(country);
                     country = ptfmanager.findPosition(ptf, nextSymbol).getCountry();
+                    Currency positionCcy = getCcyByCountry(country);
                     Transaction t1;
                     {
                         t1 = tranInitializer.apply(TransactionType.MERGER_PARENT);
+                        t1.setCurrency(positionCcy);
                         t1.setCountry(country);
                         t1.setSymbol(nextSymbol);
                         t1.setQty(nextQty.negate());
                     }
                     {
                         Transaction t2 = bunchTranInitializer.apply(TransactionType.MERGER_CHILD, t1);
+                        t2.setCurrency(positionCcy);
                         t2.setCountry(country);
                         t2.setSymbol(symbol);
                         t2.setQty(qty);
