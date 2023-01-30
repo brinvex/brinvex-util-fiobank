@@ -722,16 +722,20 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     assertIsZero(rawValue);
                     assertIsZero(fees);
 
-                    country = ptfmanager.findPosition(ptf, symbol).getCountry();
+                    Position position = ptfmanager.findPosition(ptf, symbol);
+                    country = position.getCountry();
+                    Currency positionCcy = getCcyByCountry(country);
 
                     Transaction t1;
                     {
                         t1 = tranInitializer.apply(TransactionType.SPINOFF_PARENT);
+                        t1.setCurrency(positionCcy);
                         t1.setCountry(country);
                         t1.setSymbol(symbol);
                     }
                     {
                         Transaction t2 = bunchTranInitializer.apply(TransactionType.SPINOFF_CHILD, t1);
+                        t2.setCurrency(positionCcy);
                         t2.setCountry(country);
                         t2.setSymbol(rawCcy);
                         t2.setQty(qty);
@@ -1032,6 +1036,22 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                 return Country.CZ;
             default:
                 throw new IllegalArgumentException("Unexpected value: " + ccy);
+        }
+    }
+
+    private Currency getCcyByCountry(Country country) {
+        if (country == null) {
+            return null;
+        }
+        switch (country) {
+            case US:
+                return Currency.USD;
+            case DE:
+                return Currency.EUR;
+            case CZ:
+                return Currency.CZK;
+            default:
+                throw new IllegalArgumentException("Unexpected value: " + country);
         }
     }
 

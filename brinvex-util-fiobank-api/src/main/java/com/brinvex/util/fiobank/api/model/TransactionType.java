@@ -271,7 +271,7 @@ public enum TransactionType {
         protected List<Predicate<Transaction>> predicates() {
             return List.of(
                     t -> t.getNetValue() == null,
-                    t -> t.getCurrency() == null,
+                    t -> t.getCurrency() != null,
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
@@ -287,7 +287,7 @@ public enum TransactionType {
         protected List<Predicate<Transaction>> predicates() {
             return List.of(
                     t -> t.getNetValue() == null,
-                    t -> t.getCurrency() == null,
+                    t -> t.getCurrency() != null,
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) > 0,
                     t -> t.getPrice() == null,

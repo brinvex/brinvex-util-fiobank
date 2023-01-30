@@ -253,7 +253,7 @@ class FiobankBrokerServiceTest {
     }
 
     @Test
-    void processStatements_adr() {
+    void processStatements_typeConstraints() {
         List<String> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
                 fileName.endsWith("Fio_Broker_Transactions_2019.csv")        );
         if (!testFilePaths1.isEmpty()) {
