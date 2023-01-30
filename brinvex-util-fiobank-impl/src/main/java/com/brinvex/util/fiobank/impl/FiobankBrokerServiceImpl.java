@@ -267,8 +267,8 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     t.setText(text);
                     t.setSettlementDate(settlDate);
                     t.setCurrency(ccy);
-                    t.setGrossValue(ZERO);
-                    t.setNetValue(ZERO);
+                    t.setGrossValue(null);
+                    t.setNetValue(null);
                     t.setQty(ZERO);
                     t.setIncome(ZERO);
                     t.setFees(ZERO);
@@ -585,6 +585,8 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     {
                         assertTrue(RawDirection.SELL.equals(nextDirection));
                         t1 = tranInitializer.apply(TransactionType.INSTRUMENT_CHANGE_PARENT);
+                        t1.setNetValue(ZERO);
+                        t1.setGrossValue(ZERO);
                         t1.setCountry(position.getCountry());
                         t1.setSymbol(nextSymbol);
                         t1.setQty(qty.negate());
@@ -592,6 +594,8 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     {
                         assertTrue(RawDirection.BUY.equals(direction));
                         Transaction t2 = bunchTranInitializer.apply(TransactionType.INSTRUMENT_CHANGE_CHILD, t1);
+                        t2.setNetValue(ZERO);
+                        t2.setGrossValue(ZERO);
                         t2.setCountry(position.getCountry());
                         t2.setSymbol(symbol);
                         t2.setQty(qty);
@@ -616,6 +620,8 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     {
                         assertTrue(RawDirection.SELL.equals(direction));
                         t1 = tranInitializer.apply(TransactionType.INSTRUMENT_CHANGE_PARENT);
+                        t1.setNetValue(ZERO);
+                        t1.setGrossValue(ZERO);
                         t1.setCountry(position.getCountry());
                         t1.setSymbol(symbol);
                         t1.setQty(qty.negate());
@@ -623,6 +629,8 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     {
                         assertTrue(RawDirection.BUY.equals(nextDirection));
                         Transaction t2 = bunchTranInitializer.apply(TransactionType.INSTRUMENT_CHANGE_CHILD, t1);
+                        t2.setNetValue(ZERO);
+                        t2.setGrossValue(ZERO);
                         t2.setCountry(position.getCountry());
                         t2.setSymbol(nextSymbol);
                         t2.setQty(qty);
@@ -814,6 +822,8 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     }
                     {
                         Transaction t = tranInitializer.apply(TransactionType.SPLIT);
+                        t.setGrossValue(ZERO);
+                        t.setNetValue(ZERO);
                         t.setCountry(country);
                         t.setSymbol(symbol);
                         t.setSymbol(symbol);

@@ -72,7 +72,7 @@ public class PortfolioManager {
         BigDecimal netValue = tran.getNetValue();
         BigDecimal qty = tran.getQty();
 
-        if (netValue.compareTo(ZERO) != 0) {
+        if (netValue != null && netValue.compareTo(ZERO) != 0) {
             updateCash(ptf, ccy, netValue);
         }
 
