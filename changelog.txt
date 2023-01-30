@@ -1,5 +1,6 @@
 Version 1.1.6 - 2023-01-30
 ================================================================================
+fix: Detect currency for all transactions
 fix: Use position ccy for merger transactions
 fix: Use position ccy for spinoff transactions
 fix: Keep transaction net-value and gross-value null instead of zero if it is not possible to deduct or compute them
