@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.brinvex.util.fiobank.impl.parser;
+package com.brinvex.util.fiobank.impl.broker.parser;
 
 import com.brinvex.util.fiobank.api.model.Currency;
-import com.brinvex.util.fiobank.api.model.RawDirection;
+import com.brinvex.util.fiobank.api.model.RawBrokerTranDirection;
 import com.brinvex.util.fiobank.api.model.Lang;
 
 import java.math.BigDecimal;
@@ -65,50 +65,50 @@ public class ParsingUtil {
         return null;
     }
 
-    public static RawDirection toDirection(Lang lang, String direction) {
+    public static RawBrokerTranDirection toDirection(Lang lang, String direction) {
         if (direction == null || direction.isBlank()) {
             return null;
         }
         if (lang.equals(Lang.CZ)) {
             if (direction.equalsIgnoreCase(("Nákup"))) {
-                return RawDirection.BUY;
+                return RawBrokerTranDirection.BUY;
             }
             if (direction.equalsIgnoreCase(("Prodej"))) {
-                return RawDirection.SELL;
+                return RawBrokerTranDirection.SELL;
             }
             if (direction.equalsIgnoreCase("Bankovní převod")) {
-                return RawDirection.BANK_TRANSFER;
+                return RawBrokerTranDirection.BANK_TRANSFER;
             }
             if (direction.equalsIgnoreCase("Převod mezi měnami")) {
-                return RawDirection.CURRENCY_CONVERSION;
+                return RawBrokerTranDirection.CURRENCY_CONVERSION;
             }
         }
         if (lang.equals(Lang.SK)) {
             if (direction.equalsIgnoreCase(("Nákup"))) {
-                return RawDirection.BUY;
+                return RawBrokerTranDirection.BUY;
             }
             if (direction.equalsIgnoreCase(("Predaj"))) {
-                return RawDirection.SELL;
+                return RawBrokerTranDirection.SELL;
             }
             if (direction.equalsIgnoreCase("Bankový prevod")) {
-                return RawDirection.BANK_TRANSFER;
+                return RawBrokerTranDirection.BANK_TRANSFER;
             }
             if (direction.equalsIgnoreCase("Prevod mezi menami")) {
-                return RawDirection.CURRENCY_CONVERSION;
+                return RawBrokerTranDirection.CURRENCY_CONVERSION;
             }
         }
         if (lang.equals(Lang.EN)) {
             if (direction.equalsIgnoreCase(("Buy"))) {
-                return RawDirection.BUY;
+                return RawBrokerTranDirection.BUY;
             }
             if (direction.equalsIgnoreCase(("Sell"))) {
-                return RawDirection.SELL;
+                return RawBrokerTranDirection.SELL;
             }
             if (direction.equalsIgnoreCase("Bank transfer")) {
-                return RawDirection.BANK_TRANSFER;
+                return RawBrokerTranDirection.BANK_TRANSFER;
             }
             if (direction.equalsIgnoreCase("Currency Conversion")) {
-                return RawDirection.CURRENCY_CONVERSION;
+                return RawBrokerTranDirection.CURRENCY_CONVERSION;
             }
         }
         throw new IllegalArgumentException(String.format("Unexpected %s value: '%s'", lang, direction));

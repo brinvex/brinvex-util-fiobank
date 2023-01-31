@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.brinvex.util.fiobank.impl;
+package com.brinvex.util.fiobank.impl.broker;
 
 import com.brinvex.util.fiobank.api.model.Country;
 import com.brinvex.util.fiobank.api.model.Currency;
 import com.brinvex.util.fiobank.api.model.Lang;
 import com.brinvex.util.fiobank.api.model.Portfolio;
 import com.brinvex.util.fiobank.api.model.Position;
-import com.brinvex.util.fiobank.api.model.RawDirection;
-import com.brinvex.util.fiobank.api.model.RawTransaction;
-import com.brinvex.util.fiobank.api.model.RawTransactionList;
+import com.brinvex.util.fiobank.api.model.RawBrokerTranDirection;
+import com.brinvex.util.fiobank.api.model.RawBrokerTransaction;
+import com.brinvex.util.fiobank.api.model.RawBrokerTransactionList;
 import com.brinvex.util.fiobank.api.model.Transaction;
 import com.brinvex.util.fiobank.api.model.TransactionType;
-import com.brinvex.util.fiobank.api.service.FiobankBrokerService;
+import com.brinvex.util.fiobank.api.service.FioBrokerService;
 import com.brinvex.util.fiobank.api.service.exception.FiobankServiceException;
-import com.brinvex.util.fiobank.impl.parser.ParsingUtil;
-import com.brinvex.util.fiobank.impl.parser.StatementParser;
+import com.brinvex.util.fiobank.impl.broker.parser.ParsingUtil;
+import com.brinvex.util.fiobank.impl.broker.parser.BrokerStatementParser;
 import com.brinvex.util.fiobank.impl.util.IOUtil;
 
 import java.math.BigDecimal;
@@ -73,8 +73,7 @@ import static java.util.Objects.requireNonNullElse;
 import static java.util.Optional.ofNullable;
 
 @SuppressWarnings("SpellCheckingInspection")
-public class FiobankBrokerServiceImpl implements FiobankBrokerService {
-
+public class FioBrokerServiceImpl implements FioBrokerService {
 
     private static class LazyHolder {
         private static final Charset DEFAULT_CHARSET = Charset.forName("windows-1250");
@@ -84,12 +83,12 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
         private static final Pattern DIVIDEND_TAX_RATE_PATTERN = Pattern.compile("\\(((čistá)|(po\\s+zdanění)),\\s+daň\\s(?<taxRate>\\d+(,\\d+)?)\\s*%\\)");
     }
 
-    private final StatementParser statementParser = new StatementParser();
+    private final BrokerStatementParser brokerStatementParser = new BrokerStatementParser();
 
-    private final PortfolioManager ptfmanager = new PortfolioManager();
+    private final PortfolioManager ptfManager = new PortfolioManager();
 
     @Override
-    public RawTransactionList parseStatements(Collection<String> statementFilePaths) {
+    public RawBrokerTransactionList parseStatements(Collection<String> statementFilePaths) {
         return parseStatements(statementFilePaths
                 .stream()
                 .map(Path::of)
@@ -97,21 +96,22 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
         );
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
-    public RawTransactionList parseStatements(Stream<String> statementContents) {
-        List<RawTransactionList> rawTranLists = statementContents
-                .map(statementParser::parseStatement)
-                .sorted(Comparator.comparing(RawTransactionList::getPeriodFrom).thenComparing(RawTransactionList::getPeriodTo))
+    public RawBrokerTransactionList parseStatements(Stream<String> statementContents) {
+        List<RawBrokerTransactionList> rawTranLists = statementContents
+                .map(brokerStatementParser::parseStatement)
+                .sorted(Comparator.comparing(RawBrokerTransactionList::getPeriodFrom).thenComparing(RawBrokerTransactionList::getPeriodTo))
                 .collect(Collectors.toList());
 
         if (rawTranLists.isEmpty()) {
-            throw new IllegalArgumentException("Expected non-emtty stream of statements");
+            throw new IllegalArgumentException("Expected non-empty stream of statements");
         }
 
-        RawTransactionList result = new RawTransactionList();
+        RawBrokerTransactionList result = new RawBrokerTransactionList();
         String accountNumber0;
         {
-            RawTransactionList rawTranList0 = rawTranLists.get(0);
+            RawBrokerTransactionList rawTranList0 = rawTranLists.get(0);
             accountNumber0 = rawTranList0.getAccountNumber();
 
             result.setAccountNumber(accountNumber0);
@@ -119,9 +119,9 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
             result.setPeriodTo(rawTranList0.getPeriodTo());
         }
 
-        Set<RawTransaction> rawTransactions = new LinkedHashSet<>();
-        Set<Object> rawTransactionKeys = new LinkedHashSet<>();
-        for (RawTransactionList rawTranList : rawTranLists) {
+        Set<RawBrokerTransaction> rawTrans = new LinkedHashSet<>();
+        Set<Object> rawTranKeys = new LinkedHashSet<>();
+        for (RawBrokerTransactionList rawTranList : rawTranLists) {
             LocalDate periodFrom = rawTranList.getPeriodFrom();
             LocalDate periodTo = rawTranList.getPeriodTo();
 
@@ -142,22 +142,22 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                 result.setPeriodTo(periodTo);
             }
 
-            List<RawTransaction> tranListTrans = new ArrayList<>(rawTranList.getTransactions());
+            List<RawBrokerTransaction> tranListTrans = new ArrayList<>(rawTranList.getTransactions());
             Collections.reverse(tranListTrans);
             Set<Object> tranListTranKeys = new LinkedHashSet<>();
-            for (RawTransaction tranListTran : tranListTrans) {
+            for (RawBrokerTransaction tranListTran : tranListTrans) {
                 Object tranKey = constructRawTransactionKey(tranListTran);
-                if (!rawTransactionKeys.contains(tranKey)) {
-                    rawTransactions.add(tranListTran);
+                if (!rawTranKeys.contains(tranKey)) {
+                    rawTrans.add(tranListTran);
                 }
                 tranListTranKeys.add(tranKey);
             }
-            rawTransactionKeys.addAll(tranListTranKeys);
+            rawTranKeys.addAll(tranListTranKeys);
         }
 
-        result.setTransactions(rawTransactions
+        result.setTransactions(rawTrans
                 .stream()
-                .sorted(Comparator.comparing(RawTransaction::getTradeDate))
+                .sorted(Comparator.comparing(RawBrokerTransaction::getTradeDate))
                 .collect(Collectors.toCollection(ArrayList::new))
         );
 
@@ -167,14 +167,14 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
     @Override
     @SuppressWarnings("DuplicatedCode")
     public Portfolio processStatements(Portfolio ptf, Stream<String> statementContents) {
-        RawTransactionList rawTranList = parseStatements(statementContents);
-        List<RawTransaction> rawTrans = rawTranList.getTransactions();
+        RawBrokerTransactionList rawTranList = parseStatements(statementContents);
+        List<RawBrokerTransaction> rawTrans = rawTranList.getTransactions();
 
         String accountNumber = rawTranList.getAccountNumber();
         LocalDate periodFrom = rawTranList.getPeriodFrom();
         LocalDate periodTo = rawTranList.getPeriodTo();
         if (ptf == null) {
-            ptf = ptfmanager.initPortfolio(accountNumber, periodFrom, periodTo);
+            ptf = ptfManager.initPortfolio(accountNumber, periodFrom, periodTo);
         } else {
             if (!accountNumber.equals(ptf.getAccountNumber())) {
                 throw new FiobankServiceException(format("Unexpected multiple accounts: %s, %s",
@@ -190,17 +190,17 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
             if (periodTo.isAfter(ptf.getPeriodTo())) {
                 ptf.setPeriodTo(periodTo);
             }
-            List<Transaction> ptfTrans = ptf.getTransactions();
-            if (!ptfTrans.isEmpty()) {
-                Transaction lastPtfTran = ptfTrans.get(ptfTrans.size() - 1);
-                LocalDateTime lastPtfTranDate = lastPtfTran.getDate().toLocalDateTime();
-                rawTrans.removeIf(t -> !t.getTradeDate().isAfter(lastPtfTranDate));
-            }
+        }
+        List<Transaction> ptfTrans = ptf.getTransactions();
+        if (!ptfTrans.isEmpty()) {
+            Transaction lastPtfTran = ptfTrans.get(ptfTrans.size() - 1);
+            LocalDateTime lastPtfTranDate = lastPtfTran.getDate().toLocalDateTime();
+            rawTrans.removeIf(t -> !t.getTradeDate().isAfter(lastPtfTranDate));
         }
 
         LinkedList<Transaction> newTrans = new LinkedList<>();
         for (int i = 0, rawTransSize = rawTrans.size(); i < rawTransSize; i++) {
-            RawTransaction rawTran = rawTrans.get(i);
+            RawBrokerTransaction rawTran = rawTrans.get(i);
 
             LocalDateTime tranDate = rawTran.getTradeDate();
             ZonedDateTime tranZonedDate = tranDate.atZone(LazyHolder.FIO_TIME_ZONE);
@@ -211,9 +211,9 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                 BigDecimal rawValue = getValue(rawTran);
                 BigDecimal fees = getFees(rawTran);
                 BigDecimal qty = rawTran.getShares();
-                RawDirection direction = rawTran.getDirection();
+                RawBrokerTranDirection direction = rawTran.getDirection();
                 String symbol = rawTran.getSymbol();
-                Currency ccy = rawTran.getCurrency();
+                Currency ccy = rawTran.getCcy();
                 String rawCcy = rawTran.getRawCurrency();
                 BigDecimal price = rawTran.getPrice();
                 String text = rawTran.getText();
@@ -224,16 +224,16 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                 BigDecimal nextRawValue;
                 BigDecimal nextFees;
                 BigDecimal nextQty;
-                RawDirection nextDirection;
+                RawBrokerTranDirection nextDirection;
                 String nextSymbol;
                 Currency nextCcy;
                 BigDecimal nextPrice;
                 String nextText;
                 {
-                    RawTransaction nextRawTran = i < rawTransSize - 1 ? rawTrans.get(i + 1) : null;
+                    RawBrokerTransaction nextRawTran = i < rawTransSize - 1 ? rawTrans.get(i + 1) : null;
                     if (nextRawTran != null
-                        && tranDate.isEqual(rawTran.getTradeDate())
-                        && settlDate.isEqual(rawTran.getSettlementDate())
+                        && tranDate.isEqual(nextRawTran.getTradeDate())
+                        && settlDate.isEqual(nextRawTran.getSettlementDate())
                     ) {
                         nextTranType = detectTranType(nextRawTran);
                         nextCountry = detectCountry(nextRawTran);
@@ -242,7 +242,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                         nextQty = nextRawTran.getShares();
                         nextDirection = nextRawTran.getDirection();
                         nextSymbol = nextRawTran.getSymbol();
-                        nextCcy = nextRawTran.getCurrency();
+                        nextCcy = nextRawTran.getCcy();
                         nextPrice = nextRawTran.getPrice();
                         nextText = nextRawTran.getText();
                     } else {
@@ -259,7 +259,6 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     }
                 }
 
-                List<Transaction> trans = ptf.getTransactions();
                 Function<TransactionType, Transaction> tranInitializer = tType -> {
                     Transaction t = new Transaction();
                     t.setType(tType);
@@ -273,7 +272,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     t.setIncome(ZERO);
                     t.setFees(ZERO);
                     t.setTax(null);
-                    trans.add(t);
+                    ptfTrans.add(t);
                     newTrans.add(t);
                     return t;
                 };
@@ -286,7 +285,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                 };
 
                 if (tranType == TransactionType.CASH_TOP_UP) {
-                    assertTrue(direction == null || RawDirection.BANK_TRANSFER.equals(direction));
+                    assertTrue(direction == null || RawBrokerTranDirection.BANK_TRANSFER.equals(direction));
                     assertNull(symbol);
                     assertNull(price);
                     assertIsZero(qty);
@@ -302,7 +301,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     t.setFees(fees);
 
                 } else if (tranType == TransactionType.CASH_WITHDRAWAL) {
-                    assertTrue(direction == null || RawDirection.BANK_TRANSFER.equals(direction));
+                    assertTrue(direction == null || RawBrokerTranDirection.BANK_TRANSFER.equals(direction));
                     assertNull(symbol);
                     assertNull(price);
                     assertIsZero(qty);
@@ -322,7 +321,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     t.setFees(fees);
 
                 } else if (tranType == TransactionType.BUY) {
-                    assertTrue(direction.equals(RawDirection.BUY));
+                    assertTrue(direction.equals(RawBrokerTranDirection.BUY));
                     assertNotNull(country);
                     assertNotNull(symbol);
                     assertIsPositive(price);
@@ -341,7 +340,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     t.setFees(fees);
 
                 } else if (tranType == TransactionType.SELL) {
-                    assertTrue(direction.equals(RawDirection.SELL));
+                    assertTrue(direction.equals(RawBrokerTranDirection.SELL));
                     assertNotNull(country);
                     assertNotNull(symbol);
                     assertIsPositive(price);
@@ -360,7 +359,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     t.setFees(fees);
 
                 } else if (tranType == TransactionType.FX_BUY) {
-                    assertTrue(direction.equals(RawDirection.CURRENCY_CONVERSION));
+                    assertTrue(direction.equals(RawBrokerTranDirection.CURRENCY_CONVERSION));
                     assertNotNull(symbol);
                     assertIsPositive(price);
                     assertIsPositive(qty);
@@ -377,7 +376,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     t.setFees(fees);
 
                 } else if (tranType == TransactionType.FX_SELL) {
-                    assertTrue(direction.equals(RawDirection.CURRENCY_CONVERSION));
+                    assertTrue(direction.equals(RawBrokerTranDirection.CURRENCY_CONVERSION));
                     assertNotNull(symbol);
                     assertIsPositive(price);
                     assertIsPositive(qty);
@@ -470,7 +469,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     if (String.format("%s - Stock Dividend", symbol).equals(text)) {
                         assertIsZero(fees);
                         assertNull(country);
-                        country = ptfmanager.findPosition(ptf, symbol).getCountry();
+                        country = ptfManager.findPosition(ptf, symbol).getCountry();
                         Transaction t = tranInitializer.apply(TransactionType.STOCK_DIVIDEND);
                         t.setCountry(country);
                         t.setSymbol(symbol);
@@ -580,12 +579,12 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     assertNull(ccy);
                     assertNull(nextCcy);
 
-                    Position position = ptfmanager.findPosition(ptf, nextSymbol);
+                    Position position = ptfManager.findPosition(ptf, nextSymbol);
                     Country positionCountry = position.getCountry();
                     Currency countryCcy = getCcyByCountry(positionCountry);
                     Transaction t1;
                     {
-                        assertTrue(RawDirection.SELL.equals(nextDirection));
+                        assertTrue(RawBrokerTranDirection.SELL.equals(nextDirection));
                         t1 = tranInitializer.apply(TransactionType.INSTRUMENT_CHANGE_PARENT);
                         t1.setNetValue(ZERO);
                         t1.setGrossValue(ZERO);
@@ -595,7 +594,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                         t1.setQty(qty.negate());
                     }
                     {
-                        assertTrue(RawDirection.BUY.equals(direction));
+                        assertTrue(RawBrokerTranDirection.BUY.equals(direction));
                         Transaction t2 = bunchTranInitializer.apply(TransactionType.INSTRUMENT_CHANGE_CHILD, t1);
                         t2.setNetValue(ZERO);
                         t2.setGrossValue(ZERO);
@@ -619,13 +618,13 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     assertNull(ccy);
                     assertNull(nextCcy);
 
-                    Position position = ptfmanager.findPosition(ptf, symbol);
+                    Position position = ptfManager.findPosition(ptf, symbol);
                     country = position.getCountry();
                     Currency countryCcy = getCcyByCountry(country);
 
                     Transaction t1;
                     {
-                        assertTrue(RawDirection.SELL.equals(direction));
+                        assertTrue(RawBrokerTranDirection.SELL.equals(direction));
                         t1 = tranInitializer.apply(TransactionType.INSTRUMENT_CHANGE_PARENT);
                         t1.setNetValue(ZERO);
                         t1.setGrossValue(ZERO);
@@ -635,7 +634,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                         t1.setQty(qty.negate());
                     }
                     {
-                        assertTrue(RawDirection.BUY.equals(nextDirection));
+                        assertTrue(RawBrokerTranDirection.BUY.equals(nextDirection));
                         Transaction t2 = bunchTranInitializer.apply(TransactionType.INSTRUMENT_CHANGE_CHILD, t1);
                         t2.setNetValue(ZERO);
                         t2.setGrossValue(ZERO);
@@ -687,7 +686,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
 
                     if (TransactionType.LIQUIDATION.equals(nextTranType)) {
                         assertNotNull(country);
-                        assertTrue(nextDirection.equals(RawDirection.SELL));
+                        assertTrue(nextDirection.equals(RawBrokerTranDirection.SELL));
                         assertTrue(nextSymbol.equals(symbol));
                         assertTrue(nextCcy.equals(ccy));
                         assertIsZero(nextPrice);
@@ -708,7 +707,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     } else {
                         assertNull(country);
                         assertNull(ccy);
-                        country = ptfmanager.findPosition(ptf, symbol).getCountry();
+                        country = ptfManager.findPosition(ptf, symbol).getCountry();
                         Currency countryCcy = getCcyByCountry(country);
 
                         Transaction t = tranInitializer.apply(TransactionType.LIQUIDATION);
@@ -733,7 +732,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     assertIsZero(rawValue);
                     assertIsZero(fees);
 
-                    Position position = ptfmanager.findPosition(ptf, symbol);
+                    Position position = ptfManager.findPosition(ptf, symbol);
                     country = position.getCountry();
                     Currency positionCcy = getCcyByCountry(country);
 
@@ -752,7 +751,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                         t2.setQty(qty);
                     }
                 } else if (tranType == TransactionType.MERGER_CHILD) {
-                    assertTrue(direction == RawDirection.BUY);
+                    assertTrue(direction == RawBrokerTranDirection.BUY);
                     assertNotNull(symbol);
                     assertNull(ccy);
                     assertNull(rawCcy);
@@ -762,14 +761,14 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                     assertIsZero(fees);
 
                     assertTrue(TransactionType.MERGER_PARENT.equals(nextTranType));
-                    assertTrue(nextDirection == RawDirection.SELL);
+                    assertTrue(nextDirection == RawBrokerTranDirection.SELL);
                     assertIsZero(nextRawValue);
                     assertIsZero(nextFees);
                     assertIsZero(nextPrice);
                     assertIsPositive(nextQty);
 
                     assertNull(country);
-                    country = ptfmanager.findPosition(ptf, nextSymbol).getCountry();
+                    country = ptfManager.findPosition(ptf, nextSymbol).getCountry();
                     Currency countryCcy = getCcyByCountry(country);
                     Transaction t1;
                     {
@@ -825,13 +824,13 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                 } else if (tranType == TransactionType.SPLIT) {
                     assertNull(country);
                     assertNull(ccy);
-                    Position position = ptfmanager.findPosition(ptf, symbol);
+                    Position position = ptfManager.findPosition(ptf, symbol);
                     country = position.getCountry();
                     Currency countryCcy = getCcyByCountry(country);
 
                     if (TransactionType.SPLIT.equals(nextTranType) && nextSymbol.equals(symbol)) {
-                        assertTrue(direction == RawDirection.SELL);
-                        assertTrue(nextDirection == RawDirection.BUY);
+                        assertTrue(direction == RawBrokerTranDirection.SELL);
+                        assertTrue(nextDirection == RawBrokerTranDirection.BUY);
                         assertNull(nextCcy);
                         assertIsZero(nextPrice);
                         assertIsPositive(nextQty);
@@ -857,7 +856,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                 while (!newTrans.isEmpty()) {
                     Transaction newTran = newTrans.removeFirst();
                     try {
-                        ptfmanager.applyTransaction(ptf, newTran);
+                        ptfManager.applyTransaction(ptf, newTran);
                     } catch (Exception e) {
                         throw new FiobankServiceException(format("%s - newTran=%s, ptf=%s", i + 1, newTran, ptf), e);
                     }
@@ -895,10 +894,10 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
     }
 
     @SuppressWarnings({"SpellCheckingInspection", "DuplicatedCode", "RedundantIfStatement"})
-    private TransactionType detectTranType(RawTransaction tran) {
+    private TransactionType detectTranType(RawBrokerTransaction tran) {
         Lang lang = tran.getLang();
         String symbol = tran.getSymbol();
-        RawDirection direction = tran.getDirection();
+        RawBrokerTranDirection direction = tran.getDirection();
         String text = tran.getText();
         String market = tran.getMarket();
         if (direction == null && text.startsWith("Vloženo na účet z") && text.endsWith("Bezhotovostní vklad")) {
@@ -910,21 +909,21 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
         if (direction == null && text.startsWith("Převod z účtu")) {
             return TransactionType.CASH_TOP_UP;
         }
-        if (RawDirection.BANK_TRANSFER.equals(direction) && text.startsWith("Převod na účet")) {
+        if (RawBrokerTranDirection.BANK_TRANSFER.equals(direction) && text.startsWith("Převod na účet")) {
             return TransactionType.CASH_WITHDRAWAL;
         }
 
-        if (RawDirection.CURRENCY_CONVERSION.equals(direction) && text.equals("Nákup")) {
+        if (RawBrokerTranDirection.CURRENCY_CONVERSION.equals(direction) && text.equals("Nákup")) {
             return TransactionType.FX_BUY;
         }
-        if (RawDirection.CURRENCY_CONVERSION.equals(direction) && text.equals("Prodej")) {
+        if (RawBrokerTranDirection.CURRENCY_CONVERSION.equals(direction) && text.equals("Prodej")) {
             return TransactionType.FX_SELL;
         }
 
-        if (RawDirection.BUY.equals(direction) && text.equals("Nákup")) {
+        if (RawBrokerTranDirection.BUY.equals(direction) && text.equals("Nákup")) {
             return TransactionType.BUY;
         }
-        if (RawDirection.SELL.equals(direction) && text.equals("Prodej")) {
+        if (RawBrokerTranDirection.SELL.equals(direction) && text.equals("Prodej")) {
             return TransactionType.SELL;
         }
         if (direction == null && text.startsWith(format("%s - Dividenda", symbol))) {
@@ -980,7 +979,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
         if (direction == null && text.startsWith(format("%s - Security Liquidated", symbol))) {
             return TransactionType.LIQUIDATION;
         }
-        if (direction == RawDirection.SELL && text.startsWith("Security Liquidated")) {
+        if (direction == RawBrokerTranDirection.SELL && text.startsWith("Security Liquidated")) {
             return TransactionType.LIQUIDATION;
         }
         if (direction == null && text.startsWith("Poplatek za on-line data")) {
@@ -1015,9 +1014,9 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                 || text.contains("Change of Listing: ")
                 || text.contains("Change in Security ID (ISIN Change)")
             ) {
-                if (RawDirection.SELL.equals(direction)) {
+                if (RawBrokerTranDirection.SELL.equals(direction)) {
                     return TransactionType.INSTRUMENT_CHANGE_PARENT;
-                } else if (RawDirection.BUY.equals(direction)) {
+                } else if (RawBrokerTranDirection.BUY.equals(direction)) {
                     return TransactionType.INSTRUMENT_CHANGE_CHILD;
                 }
             }
@@ -1025,9 +1024,9 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
                 return TransactionType.SPLIT;
             }
             if (text.contains("Stock Merger ")) {
-                if (RawDirection.SELL.equals(direction)) {
+                if (RawBrokerTranDirection.SELL.equals(direction)) {
                     return TransactionType.MERGER_PARENT;
-                } else if (RawDirection.BUY.equals(direction)) {
+                } else if (RawBrokerTranDirection.BUY.equals(direction)) {
                     return TransactionType.MERGER_CHILD;
                 }
             }
@@ -1039,8 +1038,8 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
         throw new FiobankServiceException(format("Could not detect transaction type: %s", tran));
     }
 
-    private Country detectCountry(RawTransaction rawTransaction) {
-        Currency ccy = rawTransaction.getCurrency();
+    private Country detectCountry(RawBrokerTransaction rawTransaction) {
+        Currency ccy = rawTransaction.getCcy();
         if (ccy == null) {
             return null;
         }
@@ -1072,14 +1071,14 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
         }
     }
 
-    private Object constructRawTransactionKey(RawTransaction tran) {
+    private Object constructRawTransactionKey(RawBrokerTransaction tran) {
         return Arrays.asList(
                 tran.getTradeDate(),
                 tran.getDirection(),
                 tran.getSymbol(),
                 tran.getPrice(),
                 tran.getShares(),
-                tran.getCurrency(),
+                tran.getCcy(),
                 tran.getVolumeCzk(),
                 tran.getFeesCzk(),
                 tran.getVolumeUsd(),
@@ -1090,8 +1089,8 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
     }
 
     @SuppressWarnings("DuplicatedCode")
-    private BigDecimal getFees(RawTransaction rawTran) {
-        Currency ccy = rawTran.getCurrency();
+    private BigDecimal getFees(RawBrokerTransaction rawTran) {
+        Currency ccy = rawTran.getCcy();
         BigDecimal rawFees = null;
         if (ccy != null) {
             BigDecimal feesUsd = rawTran.getFeesUsd();
@@ -1117,8 +1116,8 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
     }
 
     @SuppressWarnings("DuplicatedCode")
-    private BigDecimal getValue(RawTransaction rawTran) {
-        Currency ccy = rawTran.getCurrency();
+    private BigDecimal getValue(RawBrokerTransaction rawTran) {
+        Currency ccy = rawTran.getCcy();
         BigDecimal rawValue = null;
         if (ccy != null) {
             BigDecimal volUsd = rawTran.getVolumeUsd();

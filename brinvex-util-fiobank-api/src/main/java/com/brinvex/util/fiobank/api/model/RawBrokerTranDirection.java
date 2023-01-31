@@ -15,7 +15,7 @@
  */
 package com.brinvex.util.fiobank.api.model;
 
-public enum RawDirection {
+public enum RawBrokerTranDirection {
 
     BUY,
 

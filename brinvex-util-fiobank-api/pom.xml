@@ -34,7 +34,7 @@
     <name>Brinvex Fiobank Utils - Api</name>
     <description>
         Brinvex-Util-Fiobank is a compact Java library which enables developers
-        to easily extract and work with data from Fio Bank brokerage account reports.
+        to easily work with data coming from Fio bank account or Fio E-Broker account.
     </description>
 
 </project>

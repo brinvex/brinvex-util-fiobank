@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.brinvex.util.fiobank.impl;
+package com.brinvex.util.fiobank.impl.broker;
 
 import com.brinvex.util.fiobank.api.model.Country;
 import com.brinvex.util.fiobank.api.model.Currency;

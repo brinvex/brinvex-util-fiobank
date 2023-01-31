@@ -137,6 +137,19 @@ public enum TransactionType {
             );
         }
     },
+    INTEREST {
+        @Override
+        protected List<Predicate<Transaction>> predicates() {
+            return List.of(
+                    t -> t.getNetValue().compareTo(ZERO) > 0,
+                    t -> t.getQty().compareTo(ZERO) == 0,
+                    t -> t.getPrice() == null,
+                    t -> t.getIncome().compareTo(ZERO) > 0,
+                    t -> t.getFees().compareTo(ZERO) <= 0,
+                    t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) <= 0
+            );
+        }
+    },
     FX_BUY {
         @Override
         protected List<Predicate<Transaction>> predicates() {
@@ -183,7 +196,6 @@ public enum TransactionType {
         protected List<Predicate<Transaction>> predicates() {
             return List.of(
                     t -> t.getNetValue().compareTo(ZERO) < 0,
-                    t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
                     t -> t.getIncome().compareTo(ZERO) == 0,

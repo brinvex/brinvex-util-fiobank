@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
-public class RawTransactionList implements Serializable {
+public class RawBankTransactionList implements Serializable {
 
     private String accountNumber;
 
@@ -27,7 +27,7 @@ public class RawTransactionList implements Serializable {
 
     private LocalDate periodTo;
 
-    private List<RawTransaction> transactions;
+    private List<RawBankTransaction> transactions;
 
     public String getAccountNumber() {
         return accountNumber;
@@ -53,17 +53,17 @@ public class RawTransactionList implements Serializable {
         this.periodTo = periodTo;
     }
 
-    public List<RawTransaction> getTransactions() {
+    public List<RawBankTransaction> getTransactions() {
         return transactions;
     }
 
-    public void setTransactions(List<RawTransaction> transactions) {
+    public void setTransactions(List<RawBankTransaction> transactions) {
         this.transactions = transactions;
     }
 
     @Override
     public String toString() {
-        return "RawTransactionList{" +
+        return "RawBankTransactionList{" +
                "accountNumber='" + accountNumber + '\'' +
                ", periodFrom=" + periodFrom +
                ", periodTo=" + periodTo +

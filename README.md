@@ -2,54 +2,67 @@
 
 ## Introduction
 
-_Brinvex Fiobank Utils_ is a compact Java library which enables developers to easily work with Fiobank E&#x2011;Broker data.
+_Brinvex Fiobank Utils_ is a compact Java library which enables developers 
+to easily work with data coming from Fio bank account or Fio E&#x2011;Broker account.
 
-## How to use it
-
-- Add dependencies
+## Maven dependency declaration
+To use _Brinvex Fiobank Utils_ in your Maven project, declare the following dependency in your project's pom file. 
+No transitive dependencies are required during compilation or at runtime.
 ````
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-fiobank-api</artifactId>
-    <version>1.1.8</version>
+    <version>1.2.0</version>
 </dependency>
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-fiobank-impl</artifactId>
-    <version>1.1.8</version>
+    <version>1.2.0</version>
     <scope>runtime</scope>
 </dependency>
 ````
-- Process transactions reports
-````
-FiobankBrokerService svc = FiobankServiceFactory.INSTANCE.getBrokerService();
+## Features
 
-PortfolioPeriod ptf = svc.processStatements(List.of(
-    "c:/tmp/Fio_Broker_Transactions_2020_CZ.csv",    
+- #### Transform Fio Broker csv reports into cleaner and more robust data model
+
+````
+FioBrokerService svc = FioServiceFactory.INSTANCE.getBrokerService();
+Portfolio ptf = svc.processStatements(List.of(
     "c:/tmp/Fio_Broker_Transactions_2021_CZ.csv",    
-    "c:/tmp/Fio_Broker_Transactions_2022_CZ.csv",   
+    "c:/tmp/Fio_Broker_Transactions_2022_CZ.csv"   
 ));
 ````
-- Access returned Portfolio data structure offering consolidated detailed overview of  
-  - positions
-  - cash
-  - transactions
-  - dividends
-  - fees
-  - taxes
-  - transformations
-
 ![Datamodel diagram](diagrams/datamodel_5.png)
 
-- If you prefer just raw Java object reflecting Fio transaction report structure use
+- #### Parse Fio Broker csv reports into Java object reflecting Fio Broker transaction structure
 ````
-PortfolioPeriod ptf = svc.parseStatements(List.of(
-    "c:/tmp/Fio_Broker_Transactions_2020_CZ.csv",    
+FioBrokerService svc = FioServiceFactory.INSTANCE.getBrokerService();
+Portfolio ptf = svc.parseStatements(List.of(
     "c:/tmp/Fio_Broker_Transactions_2021_CZ.csv",    
-    "c:/tmp/Fio_Broker_Transactions_2022_CZ.csv",   
+    "c:/tmp/Fio_Broker_Transactions_2022_CZ.csv"   
 ));
 ````
 ![Datamodel diagram](diagrams/datamodel_4.png)
+
+- #### Transform Fio Bank Current Account xml reports into cleaner and more robust data model
+````
+FioBankService svc = FioServiceFactory.INSTANCE.getBankService();
+Portfolio ptf = svc.processStatements(List.of(
+    "c:/tmp/Fio_Bank_Transactions_2021.xml",  
+    "c:/tmp/Fio_Bank_Transactions_2022.xml"  
+));
+````
+
+- #### Fetch Fio Bank Current Account xml report via Fio API
+````
+FioBankService svc = FioServiceFactory.INSTANCE.getBankService();
+String xml = svc.fetchStatement(
+    API_KEY, 
+    LodalDate.parse("2022-01-01"),
+    LodalDate.parse("2022-12-31")  
+));
+````
+
 
 ### Requirements
 - Java 11 or above

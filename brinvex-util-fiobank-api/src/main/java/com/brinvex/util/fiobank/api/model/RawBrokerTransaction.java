@@ -15,15 +15,16 @@
  */
 package com.brinvex.util.fiobank.api.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class RawTransaction {
+public class RawBrokerTransaction implements Serializable {
 
     private LocalDateTime tradeDate;
 
-    private RawDirection direction;
+    private RawBrokerTranDirection direction;
 
     private String symbol;
 
@@ -33,7 +34,7 @@ public class RawTransaction {
 
     private BigDecimal shares;
 
-    private Currency currency;
+    private Currency ccy;
 
     private String rawCurrency;
 
@@ -73,11 +74,11 @@ public class RawTransaction {
         this.tradeDate = tradeDate;
     }
 
-    public RawDirection getDirection() {
+    public RawBrokerTranDirection getDirection() {
         return direction;
     }
 
-    public void setDirection(RawDirection direction) {
+    public void setDirection(RawBrokerTranDirection direction) {
         this.direction = direction;
     }
 
@@ -113,12 +114,12 @@ public class RawTransaction {
         this.shares = shares;
     }
 
-    public Currency getCurrency() {
-        return currency;
+    public Currency getCcy() {
+        return ccy;
     }
 
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
+    public void setCcy(Currency ccy) {
+        this.ccy = ccy;
     }
 
     public String getRawCurrency() {
@@ -250,7 +251,7 @@ public class RawTransaction {
                ", rawSymbol='" + rawSymbol + '\'' +
                ", price=" + price +
                ", shares=" + shares +
-               ", currency=" + currency +
+               ", currency=" + ccy +
                ", rawCurrency='" + rawCurrency + '\'' +
                ", volumeCzk=" + volumeCzk +
                ", feesCzk=" + feesCzk +

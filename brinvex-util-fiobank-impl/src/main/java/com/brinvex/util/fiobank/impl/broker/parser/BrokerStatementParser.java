@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.brinvex.util.fiobank.impl.parser;
+package com.brinvex.util.fiobank.impl.broker.parser;
 
 import com.brinvex.util.fiobank.api.model.Lang;
-import com.brinvex.util.fiobank.api.model.RawTransaction;
-import com.brinvex.util.fiobank.api.model.RawTransactionList;
+import com.brinvex.util.fiobank.api.model.RawBrokerTransaction;
+import com.brinvex.util.fiobank.api.model.RawBrokerTransactionList;
 import com.brinvex.util.fiobank.api.service.exception.FiobankServiceException;
 
 import java.time.LocalDate;
@@ -32,7 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class StatementParser {
+public class BrokerStatementParser {
 
     private static class LazyHolder {
 
@@ -41,7 +41,7 @@ public class StatementParser {
     }
 
     @SuppressWarnings("SpellCheckingInspection")
-    public RawTransactionList parseStatement(String statementContent) {
+    public RawBrokerTransactionList parseStatement(String statementContent) {
         List<String> lines = statementContent
                 .lines()
                 .map(String::trim)
@@ -54,7 +54,7 @@ public class StatementParser {
         Map<TranColumnDef, Integer> headers = null;
 
 
-        List<RawTransaction> rawTrans = new ArrayList<>();
+        List<RawBrokerTransaction> rawTrans = new ArrayList<>();
         for (int i = 0, linesSize = lines.size(); i < linesSize; i++) {
             String line = lines.get(i);
             if (line.isBlank()) {
@@ -113,7 +113,7 @@ public class StatementParser {
                     continue;
                 }
 
-                RawTransaction rawTran = new RawTransaction();
+                RawBrokerTransaction rawTran = new RawBrokerTransaction();
                 rawTran.setLang(lang);
                 {
                     List<String> cells = List.of(LazyHolder.COLUMN_DELIMITER_PATTERN.split(line, -1));
@@ -138,7 +138,7 @@ public class StatementParser {
 
         }
 
-        RawTransactionList rawTranList = new RawTransactionList();
+        RawBrokerTransactionList rawTranList = new RawBrokerTransactionList();
 
         rawTranList.setAccountNumber(accountNumber);
         rawTranList.setPeriodFrom(periodFrom);

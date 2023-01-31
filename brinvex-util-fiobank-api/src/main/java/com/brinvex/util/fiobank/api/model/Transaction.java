@@ -22,6 +22,8 @@ import java.time.ZonedDateTime;
 
 public class Transaction implements Serializable {
 
+    private String id;
+
     private ZonedDateTime date;
 
     private TransactionType type;
@@ -51,6 +53,14 @@ public class Transaction implements Serializable {
     private String bunchId;
 
     private String text;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public ZonedDateTime getDate() {
         return date;

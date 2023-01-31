@@ -16,28 +16,38 @@
 package com.brinvex.util.fiobank.api.service;
 
 import com.brinvex.util.fiobank.api.model.Portfolio;
-import com.brinvex.util.fiobank.api.model.RawTransactionList;
+import com.brinvex.util.fiobank.api.model.RawBankTransactionList;
 
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
  * An interface publishing methods for working with Fio Bank Broker data.
- * An implementation class instance should be retrieved using {@link FiobankServiceFactory#getBrokerService()}.
+ * An implementation class instance should be retrieved using {@link FioServiceFactory#getBrokerService()}.
  * The factory as well as the default implementation instance is a thread-safe singleton.
  */
-public interface FiobankBrokerService {
+public interface FioBankService {
 
-    RawTransactionList parseStatements(Stream<String> statementContents);
+    RawBankTransactionList parseStatements(Stream<String> statementContents);
 
-    RawTransactionList parseStatements(Collection<String> statementFilePaths);
-
-    Portfolio processStatements(Stream<String> statementContents);
+    RawBankTransactionList parseStatements(Collection<String> statementFilePaths);
 
     Portfolio processStatements(Collection<String> statementFilePaths);
+
+    Portfolio processStatements(Stream<String> statementContents);
 
     Portfolio processStatements(Portfolio ptf, Stream<String> statementContents);
 
     Portfolio processStatements(Portfolio ptf, Collection<String> statementFilePaths);
+
+    Portfolio processStatements(String apiKey, LocalDate fromDayIncl, LocalDate toDayIncl, Function<String, String> fetcher);
+
+    String fetchStatement(String apiKey, LocalDate fromDayIncl, LocalDate toDayIncl);
+
+    default String fetchStatement(String apiKey, LocalDate fromDayIncl) {
+        return fetchStatement(apiKey, fromDayIncl, LocalDate.now());
+    }
 
 }
