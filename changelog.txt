@@ -1,4 +1,4 @@
-Version 1.1.6 - 2023-01-30
+Version 1.1.8 - 2023-01-30
 ================================================================================
 fix: Detect currency for all transactions
 fix: Use position ccy for merger transactions

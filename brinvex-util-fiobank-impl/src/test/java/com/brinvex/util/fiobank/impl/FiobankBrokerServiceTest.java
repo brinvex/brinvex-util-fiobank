@@ -27,17 +27,20 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static java.math.BigDecimal.ZERO;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressWarnings("SpellCheckingInspection")
 class FiobankBrokerServiceTest {
 
     private static final FiobankBrokerService fiobankSvc = FiobankServiceFactory.INSTANCE.getBrokerService();
@@ -255,7 +258,7 @@ class FiobankBrokerServiceTest {
     @Test
     void processStatements_typeConstraints() {
         List<String> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
-                fileName.endsWith("Fio_Broker_Transactions_2019.csv")        );
+                fileName.endsWith("Fio_Broker_Transactions_2019.csv"));
         if (!testFilePaths1.isEmpty()) {
             Portfolio ptf1 = fiobankSvc.processStatements(testFilePaths1);
 
@@ -264,6 +267,28 @@ class FiobankBrokerServiceTest {
                     if (t.getText().contains("ADR")) {
                         assertNotNull(t.getSymbol());
                         assertNotNull(t.getCountry());
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void processStatements_dividendTax() {
+        List<String> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
+                fileName.contains("Fio_Broker_Transactions_2019") ||
+                fileName.contains("Fio_Broker_Transactions_2020") ||
+                fileName.contains("Fio_Broker_Transactions_2021") ||
+                fileName.contains("Fio_Broker_Transactions_2022")
+        );
+        if (!testFilePaths1.isEmpty()) {
+            Portfolio ptf1 = fiobankSvc.processStatements(testFilePaths1);
+
+            for (Transaction t : ptf1.getTransactions()) {
+                if (t.getType().equals(TransactionType.CASH_DIVIDEND)) {
+                    String text = t.getText();
+                    if (text.contains(" daň ")) {
+                        assertTrue(t.getTax().compareTo(ZERO) < 0);
                     }
                 }
             }

@@ -81,7 +81,7 @@ public class FiobankBrokerServiceImpl implements FiobankBrokerService {
 
         private static final ZoneId FIO_TIME_ZONE = ZoneId.of("Europe/Prague");
 
-        private static final Pattern DIVIDEND_TAX_RATE_PATTERN = Pattern.compile("\\(čistá,\\s+daň\\s(?<taxRate>\\d+(,\\d+)?)\\s*%\\)");
+        private static final Pattern DIVIDEND_TAX_RATE_PATTERN = Pattern.compile("\\(((čistá)|(po\\s+zdanění)),\\s+daň\\s(?<taxRate>\\d+(,\\d+)?)\\s*%\\)");
     }
 
     private final StatementParser statementParser = new StatementParser();
