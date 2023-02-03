@@ -56,6 +56,18 @@ class FioBrokerServiceTest {
     }
 
     @Test
+    void processStatements_base() {
+        List<String> testFilePaths = testHelper.getTestFilePaths(f ->
+                f.equals("Fio_Broker_Transactions_2021_B_SK.csv") ||
+                f.equals("Fio_Broker_Transactions_2022_B_SK.csv")
+        );
+        if (!testFilePaths.isEmpty()) {
+            brokerSvc.processStatements(testFilePaths);
+        }
+    }
+
+
+    @Test
     void parseStatements_lang() {
         List<String> testFilePaths = testHelper.getTestFilePaths(f ->
                 f.equals("Fio_Broker_Transactions_2022_EN.csv") ||
@@ -94,7 +106,7 @@ class FioBrokerServiceTest {
 
     @Test
     void parseStatements_sort() {
-        List<String> testFilePaths = testHelper.getTestFilePaths(fileName -> fileName.endsWith(".csv"));
+        List<String> testFilePaths = testHelper.getTestFilePaths(fileName -> fileName.endsWith(".csv") && !fileName.contains("_B_"));
         if (!testFilePaths.isEmpty()) {
             RawBrokerTransactionList rawTranList = brokerSvc.parseStatements(testFilePaths);
             List<RawBrokerTransaction> rawTrans = rawTranList.getTransactions();
@@ -274,10 +286,13 @@ class FioBrokerServiceTest {
     @Test
     void processStatements_dividendTax() {
         List<String> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
-                fileName.contains("Fio_Broker_Transactions_2019") ||
-                fileName.contains("Fio_Broker_Transactions_2020") ||
-                fileName.contains("Fio_Broker_Transactions_2021") ||
-                fileName.contains("Fio_Broker_Transactions_2022")
+                (
+                        fileName.contains("Fio_Broker_Transactions_2019") ||
+                        fileName.contains("Fio_Broker_Transactions_2020") ||
+                        fileName.contains("Fio_Broker_Transactions_2021") ||
+                        fileName.contains("Fio_Broker_Transactions_2022")
+                )
+                && !fileName.contains("_B_")
         );
         if (!testFilePaths1.isEmpty()) {
             Portfolio ptf1 = brokerSvc.processStatements(testFilePaths1);

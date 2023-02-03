@@ -906,6 +906,9 @@ public class FioBrokerServiceImpl implements FioBrokerService {
         if (direction == null && text.equals("Vklad Bezhotovostní vklad")) {
             return TransactionType.CASH_TOP_UP;
         }
+        if (direction == null && text.equals("v Bezhotovostní vklad")) {
+            return TransactionType.CASH_TOP_UP;
+        }
         if (direction == null && text.startsWith("Převod z účtu")) {
             return TransactionType.CASH_TOP_UP;
         }
