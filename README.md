@@ -1,12 +1,12 @@
-# Brinvex Fiobank Utils
+# Brinvex-Util-Fiobank
 
 ## Introduction
 
-_Brinvex Fiobank Utils_ is a compact Java library which enables developers 
+_Brinvex-Util-Fiobank_ is a compact Java library which enables developers 
 to easily work with data coming from Fio bank account or Fio E&#x2011;Broker account.
 
 ## Maven dependency declaration
-To use _Brinvex Fiobank Utils_ in your Maven project, declare the following dependency in your project's pom file. 
+To use _Brinvex-Util-Fiobank_ in your Maven project, declare the following dependency in your project's pom file. 
 No transitive dependencies are required during compilation or at runtime.
 ````
 <dependency>
@@ -69,4 +69,4 @@ String xml = svc.fetchStatement(
 
 ### License
 
-- The _Brinvex Fiobank Utils_ is released under version 2.0 of the Apache License.
+- The _Brinvex-Util-Fiobank_ is released under version 2.0 of the Apache License.

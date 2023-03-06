@@ -24,7 +24,7 @@
     <version>1.2.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Brinvex Fiobank Utils</name>
+    <name>Brinvex-Util-Fiobank</name>
     <description>
         Brinvex-Util-Fiobank is a compact Java library which enables developers
         to easily work with data coming from Fio bank account or Fio E-Broker account.
