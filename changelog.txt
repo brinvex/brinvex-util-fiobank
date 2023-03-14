@@ -1,3 +1,8 @@
+Version 2.0.0 - 2023-03-23
+================================================================================
+refactor: Stable transaction id and bunchId
+
+
 Version 1.2.1 - 2023-02-03
 ================================================================================
 fix: Transaction text "v Bezhotovostní vklad" should be parsed to CASH_TOP_UP transaction type
