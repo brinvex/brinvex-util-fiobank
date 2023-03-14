@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -61,6 +62,15 @@ public class PortfolioManager {
     }
 
     public void applyTransaction(Portfolio ptf, Transaction tran) {
+        Set<String> ptfTranIds = ptf.getTransactions()
+                .stream()
+                .filter(t -> t != tran)
+                .map(Transaction::getId)
+                .collect(Collectors.toSet());
+        String tranId = tran.getId();
+        if (ptfTranIds.contains(tranId)) {
+            throw new FiobankServiceException(format("Transaction ID conflict: %s", tranId));
+        }
         TransactionType tranType = tran.getType();
         boolean tranIsValid = tranType.isValid(tran);
         if (!tranIsValid) {
@@ -68,7 +78,7 @@ public class PortfolioManager {
         }
         Country country = tran.getCountry();
         String symbol = tran.getSymbol();
-        Currency ccy = tran.getCurrency();
+        Currency ccy = tran.getCcy();
         BigDecimal netValue = tran.getNetValue();
         BigDecimal qty = tran.getQty();
 

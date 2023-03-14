@@ -52,13 +52,13 @@ class FioBankServiceTest {
 
     @Test
     void parseStatements_base() {
-        List<String> testFilePaths = testHelper.getTestFilePaths(f ->
+        List<Path> testFilePaths = testHelper.getTestFilePaths(f ->
                 f.equals("Fio_Bank_Transactions_1_201610-202302.xml") ||
                 f.equals("Fio_Bank_Transactions_2_201610-202302.xml") ||
                 f.equals("Fio_Bank_Transactions_3_201610-202302.xml") ||
                 f.equals("Fio_Bank_Transactions_4_201610-202302.xml")
         );
-        for (String testFilePath : testFilePaths) {
+        for (Path testFilePath : testFilePaths) {
             RawBankTransactionList tranList = bankSvc.parseStatements(List.of(testFilePath));
             assertNotNull(tranList);
         }
@@ -66,13 +66,13 @@ class FioBankServiceTest {
 
     @Test
     void processStatements_base() {
-        List<String> testFilePaths = testHelper.getTestFilePaths(f ->
+        List<Path> testFilePaths = testHelper.getTestFilePaths(f ->
                 f.equals("Fio_Bank_Transactions_1_201610-202302.xml") ||
                 f.equals("Fio_Bank_Transactions_2_201610-202302.xml") ||
                 f.equals("Fio_Bank_Transactions_3_201610-202302.xml") ||
                 f.equals("Fio_Bank_Transactions_4_201610-202302.xml")
         );
-        for (String testFilePath : testFilePaths) {
+        for (Path testFilePath : testFilePaths) {
             Portfolio ptf = bankSvc.processStatements(List.of(testFilePath));
             assertNotNull(ptf);
             assertEquals(1, ptf.getCash().size());
@@ -84,9 +84,9 @@ class FioBankServiceTest {
 
     @Test
     void fetch() {
-        String testFilePath = testHelper.getTestFilePath(f -> f.equals("Fio_Bank_apiKey"));
+        Path testFilePath = testHelper.getTestFilePath(f -> f.equals("Fio_Bank_apiKey"));
         if (testFilePath != null) {
-            String apiKey = IOUtil.readTextFileContent(Path.of(testFilePath), StandardCharsets.UTF_8).trim();
+            String apiKey = IOUtil.readTextFileContent(testFilePath, StandardCharsets.UTF_8).trim();
             String xml = bankSvc.fetchStatement(apiKey, LocalDate.parse("2022-01-01"), LocalDate.parse("2023-02-01"));
             Portfolio ptf = bankSvc.processStatements(Stream.of(xml));
             assertNotNull(ptf);

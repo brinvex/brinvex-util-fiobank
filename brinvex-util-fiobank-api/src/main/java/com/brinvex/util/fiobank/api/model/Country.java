@@ -15,11 +15,23 @@
  */
 package com.brinvex.util.fiobank.api.model;
 
+
 public enum Country {
 
-    US,
+    US(Currency.USD),
 
-    CZ,
+    CZ(Currency.CZK),
 
-    DE,
+    DE(Currency.EUR),
+    ;
+
+    private final Currency ccy;
+
+    Country(Currency ccy) {
+        this.ccy = ccy;
+    }
+
+    public Currency getCcy() {
+        return ccy;
+    }
 }

@@ -18,6 +18,7 @@ package com.brinvex.util.fiobank.api.service;
 import com.brinvex.util.fiobank.api.model.Portfolio;
 import com.brinvex.util.fiobank.api.model.RawBrokerTransactionList;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -30,14 +31,14 @@ public interface FioBrokerService {
 
     RawBrokerTransactionList parseStatements(Stream<String> statementContents);
 
-    RawBrokerTransactionList parseStatements(Collection<String> statementFilePaths);
+    RawBrokerTransactionList parseStatements(Collection<Path> statementFilePaths);
 
     Portfolio processStatements(Stream<String> statementContents);
 
-    Portfolio processStatements(Collection<String> statementFilePaths);
+    Portfolio processStatements(Collection<Path> statementFilePaths);
 
     Portfolio processStatements(Portfolio ptf, Stream<String> statementContents);
 
-    Portfolio processStatements(Portfolio ptf, Collection<String> statementFilePaths);
+    Portfolio processStatements(Portfolio ptf, Collection<Path> statementFilePaths);
 
 }

@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
+@SuppressWarnings("UnusedReturnValue")
 public class Transaction implements Serializable {
 
     private String id;
@@ -28,177 +29,183 @@ public class Transaction implements Serializable {
 
     private TransactionType type;
 
-    private Currency currency;
-
-    private BigDecimal grossValue;
-
-    private BigDecimal netValue;
-
     private Country country;
 
     private String symbol;
 
     private BigDecimal qty;
 
+    private Currency ccy;
+
     private BigDecimal price;
 
-    private BigDecimal income;
+    private BigDecimal grossValue;
 
-    private BigDecimal fees;
+    private BigDecimal netValue;
 
     private BigDecimal tax;
+
+    private BigDecimal fees;
 
     private LocalDate settlementDate;
 
     private String bunchId;
 
-    private String text;
+    private String note;
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public Transaction setId(String id) {
         this.id = id;
+        return this;
     }
 
     public ZonedDateTime getDate() {
         return date;
     }
 
-    public void setDate(ZonedDateTime date) {
+    public Transaction setDate(ZonedDateTime date) {
         this.date = date;
+        return this;
     }
 
     public TransactionType getType() {
         return type;
     }
 
-    public void setType(TransactionType type) {
+    public Transaction setType(TransactionType type) {
         this.type = type;
-    }
-
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
-    }
-
-    public BigDecimal getGrossValue() {
-        return grossValue;
-    }
-
-    public void setGrossValue(BigDecimal grossValue) {
-        this.grossValue = grossValue;
-    }
-
-    public BigDecimal getNetValue() {
-        return netValue;
-    }
-
-    public void setNetValue(BigDecimal netValue) {
-        this.netValue = netValue;
+        return this;
     }
 
     public Country getCountry() {
         return country;
     }
 
-    public void setCountry(Country country) {
+    public Transaction setCountry(Country country) {
         this.country = country;
+        return this;
     }
 
     public String getSymbol() {
         return symbol;
     }
 
-    public void setSymbol(String symbol) {
+    public Transaction setSymbol(String symbol) {
         this.symbol = symbol;
+        return this;
     }
 
     public BigDecimal getQty() {
         return qty;
     }
 
-    public void setQty(BigDecimal qty) {
+    public Transaction setQty(BigDecimal qty) {
         this.qty = qty;
+        return this;
+    }
+
+    public Currency getCcy() {
+        return ccy;
+    }
+
+    public Transaction setCcy(Currency ccy) {
+        this.ccy = ccy;
+        return this;
     }
 
     public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public Transaction setPrice(BigDecimal price) {
         this.price = price;
+        return this;
     }
 
-    public BigDecimal getIncome() {
-        return income;
+    public BigDecimal getGrossValue() {
+        return grossValue;
     }
 
-    public void setIncome(BigDecimal income) {
-        this.income = income;
+    public Transaction setGrossValue(BigDecimal grossValue) {
+        this.grossValue = grossValue;
+        return this;
     }
 
-    public BigDecimal getFees() {
-        return fees;
+    public BigDecimal getNetValue() {
+        return netValue;
     }
 
-    public void setFees(BigDecimal fees) {
-        this.fees = fees;
+    public Transaction setNetValue(BigDecimal netValue) {
+        this.netValue = netValue;
+        return this;
     }
 
     public BigDecimal getTax() {
         return tax;
     }
 
-    public void setTax(BigDecimal tax) {
+    public Transaction setTax(BigDecimal tax) {
         this.tax = tax;
+        return this;
+    }
+
+    public BigDecimal getFees() {
+        return fees;
+    }
+
+    public Transaction setFees(BigDecimal fees) {
+        this.fees = fees;
+        return this;
     }
 
     public LocalDate getSettlementDate() {
         return settlementDate;
     }
 
-    public void setSettlementDate(LocalDate settlementDate) {
+    public Transaction setSettlementDate(LocalDate settlementDate) {
         this.settlementDate = settlementDate;
+        return this;
     }
 
     public String getBunchId() {
         return bunchId;
     }
 
-    public void setBunchId(String bunchId) {
+    public Transaction setBunchId(String bunchId) {
         this.bunchId = bunchId;
+        return this;
     }
 
-    public String getText() {
-        return text;
+    public String getNote() {
+        return note;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public Transaction setNote(String note) {
+        this.note = note;
+        return this;
     }
 
     @Override
     public String toString() {
         return "Transaction{" +
-               "date=" + date +
+               "id='" + id + '\'' +
+               ", date=" + date +
                ", type=" + type +
-               ", currency=" + currency +
-               ", grossValue=" + grossValue +
-               ", netValue=" + netValue +
-               ", country='" + country + '\'' +
+               ", country=" + country +
                ", symbol='" + symbol + '\'' +
                ", qty=" + qty +
+               ", ccy=" + ccy +
                ", price=" + price +
-               ", income=" + income +
-               ", fees=" + fees +
+               ", grossValue=" + grossValue +
+               ", netValue=" + netValue +
                ", tax=" + tax +
+               ", fees=" + fees +
                ", settlementDate=" + settlementDate +
                ", bunchId='" + bunchId + '\'' +
+               ", note='" + note + '\'' +
                '}';
     }
 }

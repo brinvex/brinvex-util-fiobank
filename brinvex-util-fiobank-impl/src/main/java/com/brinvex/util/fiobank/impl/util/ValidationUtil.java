@@ -26,7 +26,7 @@ public class ValidationUtil {
 
     public static void assertTrue(boolean test) {
         if (!test) {
-            throw new FiobankServiceException("");
+            throw new FiobankServiceException("Validated expression is false");
         }
     }
 

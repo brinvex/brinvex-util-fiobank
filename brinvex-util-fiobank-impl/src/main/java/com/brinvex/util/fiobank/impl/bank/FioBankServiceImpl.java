@@ -130,10 +130,9 @@ public class FioBankServiceImpl implements FioBankService {
     }
 
     @Override
-    public RawBankTransactionList parseStatements(Collection<String> statementFilePaths) {
+    public RawBankTransactionList parseStatements(Collection<Path> statementFilePaths) {
         return parseStatements(statementFilePaths
                 .stream()
-                .map(Path::of)
                 .map(filePath -> IOUtil.readTextFileContent(filePath, StandardCharsets.UTF_8))
         );
     }
@@ -183,7 +182,6 @@ public class FioBankServiceImpl implements FioBankService {
                 BigDecimal tax = null;
                 BigDecimal grossValue = rawValue;
                 BigDecimal netValue = rawValue;
-                BigDecimal income = rawValue;
 
                 {
                     TransactionType nextTranType;
@@ -221,12 +219,11 @@ public class FioBankServiceImpl implements FioBankService {
                 newTran.setType(tranType);
                 newTran.setId(id);
                 newTran.setDate(tranDate.atStartOfDay(LazyHolder.FIO_TIME_ZONE));
-                newTran.setText(text);
-                newTran.setCurrency(ccy);
+                newTran.setNote(text);
+                newTran.setCcy(ccy);
                 newTran.setGrossValue(grossValue);
                 newTran.setNetValue(netValue);
                 newTran.setQty(ZERO);
-                newTran.setIncome(income);
                 newTran.setFees(ZERO);
                 newTran.setTax(tax);
                 newTran.setSettlementDate(tranDate);
@@ -244,10 +241,9 @@ public class FioBankServiceImpl implements FioBankService {
     }
 
     @Override
-    public Portfolio processStatements(Portfolio ptf, Collection<String> statementFilePaths) {
+    public Portfolio processStatements(Portfolio ptf, Collection<Path> statementFilePaths) {
         Stream<String> statementContentStream = statementFilePaths
                 .stream()
-                .map(Path::of)
                 .map(filePath -> IOUtil.readTextFileContent(filePath, StandardCharsets.UTF_8));
         return processStatements(ptf, statementContentStream);
     }
@@ -280,10 +276,9 @@ public class FioBankServiceImpl implements FioBankService {
 
 
     @Override
-    public Portfolio processStatements(Collection<String> statementFilePaths) {
+    public Portfolio processStatements(Collection<Path> statementFilePaths) {
         Stream<String> statementContentStream = statementFilePaths
                 .stream()
-                .map(Path::of)
                 .map(filePath -> IOUtil.readTextFileContent(filePath, StandardCharsets.UTF_8));
         return processStatements(statementContentStream);
     }
@@ -297,19 +292,19 @@ public class FioBankServiceImpl implements FioBankService {
     private TransactionType detectTranType(RawBankTransaction tran) {
         String rawType = tran.getType();
         if ("Bezhotovostní příjem".equals(rawType)) {
-            return TransactionType.CASH_TOP_UP;
+            return TransactionType.DEPOSIT;
         }
         if ("Příjem převodem uvnitř banky".equals(rawType)) {
-            return TransactionType.CASH_TOP_UP;
+            return TransactionType.DEPOSIT;
         }
         if ("Platba kartou".equals(rawType)) {
-            return TransactionType.CASH_WITHDRAWAL;
+            return TransactionType.WITHDRAWAL;
         }
         if ("Bezhotovostní platba".equals(rawType)) {
-            return TransactionType.CASH_WITHDRAWAL;
+            return TransactionType.WITHDRAWAL;
         }
         if ("Platba převodem uvnitř banky".equals(rawType)) {
-            return TransactionType.CASH_WITHDRAWAL;
+            return TransactionType.WITHDRAWAL;
         }
         if ("Připsaný úrok".equals(rawType)) {
             return TransactionType.INTEREST;
@@ -317,7 +312,7 @@ public class FioBankServiceImpl implements FioBankService {
         if ("Odvod daně z úroků".equals(rawType)) {
             return TransactionType.TAX;
         }
-        throw new IllegalArgumentException("" + tran);
+        throw new IllegalArgumentException(String.valueOf(tran));
 
     }
 }

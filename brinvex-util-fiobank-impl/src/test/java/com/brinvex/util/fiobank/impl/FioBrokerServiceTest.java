@@ -27,8 +27,11 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -37,6 +40,7 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FioBrokerServiceTest {
@@ -57,7 +61,7 @@ class FioBrokerServiceTest {
 
     @Test
     void processStatements_base() {
-        List<String> testFilePaths = testHelper.getTestFilePaths(f ->
+        List<Path> testFilePaths = testHelper.getTestFilePaths(f ->
                 f.equals("Fio_Broker_Transactions_2021_B_SK.csv") ||
                 f.equals("Fio_Broker_Transactions_2022_B_SK.csv")
         );
@@ -69,7 +73,7 @@ class FioBrokerServiceTest {
 
     @Test
     void parseStatements_lang() {
-        List<String> testFilePaths = testHelper.getTestFilePaths(f ->
+        List<Path> testFilePaths = testHelper.getTestFilePaths(f ->
                 f.equals("Fio_Broker_Transactions_2022_EN.csv") ||
                 f.equals("Fio_Broker_Transactions_2022_CZ.csv") ||
                 f.equals("Fio_Broker_Transactions_2022_SK.csv")
@@ -106,7 +110,7 @@ class FioBrokerServiceTest {
 
     @Test
     void parseStatements_sort() {
-        List<String> testFilePaths = testHelper.getTestFilePaths(fileName -> fileName.endsWith(".csv") && !fileName.contains("_B_"));
+        List<Path> testFilePaths = testHelper.getTestFilePaths(fileName -> fileName.endsWith(".csv") && !fileName.contains("_B_"));
         if (!testFilePaths.isEmpty()) {
             RawBrokerTransactionList rawTranList = brokerSvc.parseStatements(testFilePaths);
             List<RawBrokerTransaction> rawTrans = rawTranList.getTransactions();
@@ -120,11 +124,11 @@ class FioBrokerServiceTest {
 
     @Test
     void parseStatements_duplicate() {
-        List<String> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
+        List<Path> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
                 fileName.endsWith("Fio_Broker_Transactions_2019.csv") ||
                 fileName.endsWith("Fio_Broker_Transactions_2020.csv")
         );
-        List<String> testFilePaths2 = testHelper.getTestFilePaths(fileName ->
+        List<Path> testFilePaths2 = testHelper.getTestFilePaths(fileName ->
                 fileName.endsWith("Fio_Broker_Transactions_2020_SK.csv") ||
                 fileName.endsWith("Fio_Broker_Transactions_2019_SK.csv")
         );
@@ -141,19 +145,19 @@ class FioBrokerServiceTest {
 
     @Test
     void processStatements_lang() {
-        List<String> testFilePathsEn = testHelper.getTestFilePaths(f ->
+        List<Path> testFilePathsEn = testHelper.getTestFilePaths(f ->
                 f.equals("Fio_Broker_Transactions_2019_EN.csv") ||
                 f.equals("Fio_Broker_Transactions_2020_EN.csv") ||
                 f.equals("Fio_Broker_Transactions_2021_EN.csv") ||
                 f.equals("Fio_Broker_Transactions_2022_EN.csv")
         );
-        List<String> testFilePathsSk = testHelper.getTestFilePaths(f ->
+        List<Path> testFilePathsSk = testHelper.getTestFilePaths(f ->
                 f.equals("Fio_Broker_Transactions_2019_SK.csv") ||
                 f.equals("Fio_Broker_Transactions_2020_SK.csv") ||
                 f.equals("Fio_Broker_Transactions_2021_SK.csv") ||
                 f.equals("Fio_Broker_Transactions_2022_SK.csv")
         );
-        List<String> testFilePathsCz = testHelper.getTestFilePaths(f ->
+        List<Path> testFilePathsCz = testHelper.getTestFilePaths(f ->
                 f.equals("Fio_Broker_Transactions_2019_CZ.csv") ||
                 f.equals("Fio_Broker_Transactions_2020_CZ.csv") ||
                 f.equals("Fio_Broker_Transactions_2021_CZ.csv") ||
@@ -165,10 +169,6 @@ class FioBrokerServiceTest {
             Portfolio ptfSk = brokerSvc.processStatements(testFilePathsSk);
             Portfolio ptfCz = brokerSvc.processStatements(testFilePathsCz);
 
-            ptfEn.getTransactions().forEach(t -> t.setBunchId(null));
-            ptfCz.getTransactions().forEach(t -> t.setBunchId(null));
-            ptfSk.getTransactions().forEach(t -> t.setBunchId(null));
-
             testHelper.assertJsonEquals(ptfEn, ptfCz);
             testHelper.assertJsonEquals(ptfEn, ptfSk);
         }
@@ -176,13 +176,13 @@ class FioBrokerServiceTest {
 
     @Test
     void processStatements_data_2019_2022() {
-        List<String> transFilePaths = testHelper.getTestFilePaths(
+        List<Path> transFilePaths = testHelper.getTestFilePaths(
                 fileName -> fileName.endsWith("Fio_Broker_Transactions_2019_SK.csv")
                             || fileName.endsWith("Fio_Broker_Transactions_2020_SK.csv")
                             || fileName.endsWith("Fio_Broker_Transactions_2021_SK.csv")
                             || fileName.endsWith("Fio_Broker_Transactions_2022_SK.csv")
         );
-        String ptfFilePath = testHelper.getTestFilePath(fileName -> fileName.endsWith("Fio_Broker_Portfolio_2019_2022.json"));
+        Path ptfFilePath = testHelper.getTestFilePath(fileName -> fileName.endsWith("Fio_Broker_Portfolio_2019_2022.json"));
         if (!transFilePaths.isEmpty() && ptfFilePath != null) {
             Portfolio ptf = brokerSvc.processStatements(transFilePaths);
 
@@ -204,7 +204,7 @@ class FioBrokerServiceTest {
 
     @Test
     void processStatements_iterative() {
-        List<String> transFilePaths = new ArrayList<>(testHelper.getTestFilePaths(
+        List<Path> transFilePaths = new ArrayList<>(testHelper.getTestFilePaths(
                 fileName -> fileName.endsWith("Fio_Broker_Transactions_2019_SK.csv")
                             || fileName.endsWith("Fio_Broker_Transactions_2020_SK.csv")
                             || fileName.endsWith("Fio_Broker_Transactions_2021_SK.csv")
@@ -215,7 +215,7 @@ class FioBrokerServiceTest {
 
             Portfolio ptf2 = null;
             transFilePaths.sort(naturalOrder());
-            for (String transFilePath : transFilePaths) {
+            for (Path transFilePath : transFilePaths) {
                 ptf2 = brokerSvc.processStatements(ptf2, List.of(transFilePath));
             }
 
@@ -247,11 +247,11 @@ class FioBrokerServiceTest {
 
     @Test
     void processStatements_duplicate() {
-        List<String> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
+        List<Path> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
                 fileName.endsWith("Fio_Broker_Transactions_2019.csv") ||
                 fileName.endsWith("Fio_Broker_Transactions_2020.csv")
         );
-        List<String> testFilePaths2 = testHelper.getTestFilePaths(fileName ->
+        List<Path> testFilePaths2 = testHelper.getTestFilePaths(fileName ->
                 fileName.endsWith("Fio_Broker_Transactions_2020_SK.csv") ||
                 fileName.endsWith("Fio_Broker_Transactions_2019_SK.csv")
         );
@@ -267,14 +267,14 @@ class FioBrokerServiceTest {
 
     @Test
     void processStatements_typeConstraints() {
-        List<String> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
+        List<Path> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
                 fileName.endsWith("Fio_Broker_Transactions_2019.csv"));
         if (!testFilePaths1.isEmpty()) {
             Portfolio ptf1 = brokerSvc.processStatements(testFilePaths1);
 
             for (Transaction t : ptf1.getTransactions()) {
                 if (t.getType().equals(TransactionType.FEE)) {
-                    if (t.getText().contains("ADR")) {
+                    if (t.getNote().contains("ADR")) {
                         assertNotNull(t.getSymbol());
                         assertNotNull(t.getCountry());
                     }
@@ -285,12 +285,13 @@ class FioBrokerServiceTest {
 
     @Test
     void processStatements_dividendTax() {
-        List<String> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
+        List<Path> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
                 (
                         fileName.contains("Fio_Broker_Transactions_2019") ||
                         fileName.contains("Fio_Broker_Transactions_2020") ||
                         fileName.contains("Fio_Broker_Transactions_2021") ||
-                        fileName.contains("Fio_Broker_Transactions_2022")
+                        fileName.contains("Fio_Broker_Transactions_2022") ||
+                        fileName.contains("Fio_Broker_Transactions_2023")
                 )
                 && !fileName.contains("_B_")
         );
@@ -299,11 +300,36 @@ class FioBrokerServiceTest {
 
             for (Transaction t : ptf1.getTransactions()) {
                 if (t.getType().equals(TransactionType.CASH_DIVIDEND)) {
-                    String text = t.getText();
+                    String text = t.getNote();
                     if (text.contains(" daň ")) {
                         assertTrue(t.getTax().compareTo(ZERO) < 0);
                     }
                 }
+            }
+        }
+    }
+
+    @Test
+    void processStatements_id() {
+        List<Path> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
+                (
+                        fileName.contains("Fio_Broker_Transactions_2019") ||
+                        fileName.contains("Fio_Broker_Transactions_2020") ||
+                        fileName.contains("Fio_Broker_Transactions_2021") ||
+                        fileName.contains("Fio_Broker_Transactions_2022") ||
+                        fileName.contains("Fio_Broker_Transactions_2023")
+                )
+                && !fileName.contains("_B_")
+        );
+        if (!testFilePaths1.isEmpty()) {
+            Portfolio ptf1 = brokerSvc.processStatements(testFilePaths1);
+
+            Map<String, Transaction> idToTrans = new LinkedHashMap<>();
+            for (Transaction t : ptf1.getTransactions()) {
+                String id = t.getId();
+                assertNotNull(id);
+                Transaction duplicate = idToTrans.put(id, t);
+                assertNull(duplicate);
             }
         }
     }

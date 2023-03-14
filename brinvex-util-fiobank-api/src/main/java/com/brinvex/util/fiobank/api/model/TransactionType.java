@@ -33,7 +33,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) > 0,
                     t -> t.getPrice().compareTo(ZERO) > 0,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -47,13 +46,12 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) < 0,
                     t -> t.getPrice().compareTo(ZERO) > 0,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) <= 0
             );
         }
     },
-    CASH_TOP_UP {
+    DEPOSIT {
         @Override
         protected List<Predicate<Transaction>> predicates() {
             return List.of(
@@ -61,13 +59,12 @@ public enum TransactionType {
                     t -> t.getSymbol() == null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) > 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
         }
     },
-    CASH_WITHDRAWAL {
+    WITHDRAWAL {
         @Override
         protected List<Predicate<Transaction>> predicates() {
             return List.of(
@@ -75,7 +72,6 @@ public enum TransactionType {
                     t -> t.getSymbol() == null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) < 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -89,7 +85,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) > 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) <= 0
             );
@@ -103,7 +98,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) > 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -117,7 +111,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) >= 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) >= 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -131,7 +124,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) < 0,
                     t -> t.getFees().compareTo(ZERO) >= 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) >= 0
             );
@@ -144,7 +136,6 @@ public enum TransactionType {
                     t -> t.getNetValue().compareTo(ZERO) > 0,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) > 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) <= 0
             );
@@ -158,7 +149,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) > 0,
                     t -> t.getPrice().compareTo(ZERO) > 0,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -172,7 +162,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) < 0,
                     t -> t.getPrice().compareTo(ZERO) > 0,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) <= 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -185,7 +174,6 @@ public enum TransactionType {
                     t -> t.getNetValue().compareTo(ZERO) < 0,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) < 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -198,7 +186,6 @@ public enum TransactionType {
                     t -> t.getNetValue().compareTo(ZERO) < 0,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> t.getTax().compareTo(ZERO) < 0
             );
@@ -212,7 +199,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> t.getTax().compareTo(ZERO) > 0
             );
@@ -226,7 +212,6 @@ public enum TransactionType {
                     t -> t.getSymbol() == null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) > 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -241,7 +226,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) <= 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -256,7 +240,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) >= 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -271,7 +254,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -286,7 +268,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) > 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -301,7 +282,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) == 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) != 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -316,7 +296,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) != 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -330,7 +309,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) < 0,
                     t -> t.getPrice().compareTo(ZERO) == 0,
-                    t -> t.getIncome().compareTo(ZERO) >= 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -345,7 +323,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) < 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -360,7 +337,6 @@ public enum TransactionType {
                     t -> t.getSymbol() != null,
                     t -> t.getQty().compareTo(ZERO) > 0,
                     t -> t.getPrice() == null,
-                    t -> t.getIncome().compareTo(ZERO) == 0,
                     t -> t.getFees().compareTo(ZERO) == 0,
                     t -> requireNonNullElse(t.getTax(), ZERO).compareTo(ZERO) == 0
             );
@@ -393,7 +369,7 @@ public enum TransactionType {
             }
         }
         if (t.getNetValue() != null) {
-            if (t.getCurrency() == null) {
+            if (t.getCcy() == null) {
                 return false;
             }
         }
@@ -406,51 +382,22 @@ public enum TransactionType {
                 return false;
             }
         }
-        if (!grossValueIsValid(t)) {
-            return false;
-        }
-        if (!netValueIsValid(t)) {
+        if (!grossValueNetValueIsValid(t)) {
             return false;
         }
         return true;
     }
 
-    protected boolean grossValueIsValid(Transaction t) {
+    protected boolean grossValueNetValueIsValid(Transaction t) {
         BigDecimal grossValue = t.getGrossValue();
-        if (grossValue == null) {
-            return t.getNetValue() == null;
-        }
-        BigDecimal qty = t.getQty();
-        BigDecimal price = t.getPrice();
-        BigDecimal income = t.getIncome();
-        BigDecimal compGrossValue;
-        if (price == null) {
-            compGrossValue = income;
-        } else {
-            compGrossValue = qty.multiply(price).negate().add(income);
-        }
-        boolean isValid = compGrossValue.subtract(grossValue).abs().compareTo(NUMBER_DIFF_TOLERANCE) < 0;
-        return isValid;
-    }
-
-    protected boolean netValueIsValid(Transaction t) {
         BigDecimal netValue = t.getNetValue();
-        if (netValue == null) {
-            return t.getGrossValue() == null;
+        if (grossValue == null) {
+            return netValue == null;
         }
-        BigDecimal qty = t.getQty();
-        BigDecimal price = t.getPrice();
-        BigDecimal income = t.getIncome();
         BigDecimal fees = t.getFees();
         BigDecimal tax = requireNonNullElse(t.getTax(), ZERO);
-        BigDecimal compNetValue;
-        if (price == null) {
-            compNetValue = income.add(fees).add(tax);
-        } else {
-            compNetValue = qty.multiply(price).negate().add(income).add(fees).add(tax);
-        }
-        boolean isValid = compNetValue.subtract(netValue).abs().compareTo(NUMBER_DIFF_TOLERANCE) < 0;
+
+        boolean isValid = grossValue.add(fees).add(tax).subtract(netValue).compareTo(NUMBER_DIFF_TOLERANCE) < 0;
         return isValid;
     }
-
 }

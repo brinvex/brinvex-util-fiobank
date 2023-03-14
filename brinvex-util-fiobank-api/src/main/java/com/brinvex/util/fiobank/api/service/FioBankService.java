@@ -18,6 +18,7 @@ package com.brinvex.util.fiobank.api.service;
 import com.brinvex.util.fiobank.api.model.Portfolio;
 import com.brinvex.util.fiobank.api.model.RawBankTransactionList;
 
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.function.Function;
@@ -32,15 +33,15 @@ public interface FioBankService {
 
     RawBankTransactionList parseStatements(Stream<String> statementContents);
 
-    RawBankTransactionList parseStatements(Collection<String> statementFilePaths);
+    RawBankTransactionList parseStatements(Collection<Path> statementFilePaths);
 
-    Portfolio processStatements(Collection<String> statementFilePaths);
+    Portfolio processStatements(Collection<Path> statementFilePaths);
 
     Portfolio processStatements(Stream<String> statementContents);
 
     Portfolio processStatements(Portfolio ptf, Stream<String> statementContents);
 
-    Portfolio processStatements(Portfolio ptf, Collection<String> statementFilePaths);
+    Portfolio processStatements(Portfolio ptf, Collection<Path> statementFilePaths);
 
     Portfolio processStatements(String apiKey, LocalDate fromDayIncl, LocalDate toDayIncl, Function<String, String> fetcher);
 

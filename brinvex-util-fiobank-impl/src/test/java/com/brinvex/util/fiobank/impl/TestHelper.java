@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestHelper implements AutoCloseable {
 
-    private static final String TEST_DATA_FOLDER = "c:/prj/brinvex/brinvex-util-fiobank/test-data";
+    private static final String TEST_DATA_FOLDER = "c:/prj/brinvex/brinvex-util/brinvex-util-fiobank/test-data";
 
     private final Jsonb jsonb = JsonbBuilder.create();
 
@@ -43,8 +43,8 @@ public class TestHelper implements AutoCloseable {
         jsonb.close();
     }
 
-    public String getTestFilePath(Predicate<String> fileNameFilter) {
-        List<String> paths = getTestFilePaths(fileNameFilter);
+    public Path getTestFilePath(Predicate<String> fileNameFilter) {
+        List<Path> paths = getTestFilePaths(fileNameFilter);
         int size = paths.size();
         if (size == 0) {
             return null;
@@ -55,10 +55,10 @@ public class TestHelper implements AutoCloseable {
         return paths.get(0);
     }
 
-    public List<String> getTestFilePaths(Predicate<String> fileNameFilter) {
+    public List<Path> getTestFilePaths(Predicate<String> fileNameFilter) {
         String testDataFolder = TEST_DATA_FOLDER;
 
-        List<String> testStatementFilePaths;
+        List<Path> testStatementFilePaths;
         Path testFolderPath = Paths.get(testDataFolder);
         File testFolder = testFolderPath.toFile();
         if (!testFolder.exists() || !testFolder.isDirectory()) {
@@ -68,7 +68,6 @@ public class TestHelper implements AutoCloseable {
             testStatementFilePaths = filePaths
                     .filter(p -> fileNameFilter.test(p.getFileName().toString()))
                     .filter(p -> p.toFile().isFile())
-                    .map(Path::toString)
                     .collect(Collectors.toList());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -79,9 +78,9 @@ public class TestHelper implements AutoCloseable {
         return testStatementFilePaths;
     }
 
-    public <T> T readFromJson(String filePath, Class<T> type) {
+    public <T> T readFromJson(Path filePath, Class<T> type) {
         try {
-            return jsonb.fromJson(Files.readString(Paths.get(filePath)), type);
+            return jsonb.fromJson(Files.readString(filePath), type);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
