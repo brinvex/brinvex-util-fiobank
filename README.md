@@ -32,7 +32,7 @@ Portfolio ptf = svc.processStatements(List.of(
     "c:/tmp/Fio_Broker_Transactions_2022_CZ.csv"   
 ));
 ````
-![Datamodel diagram](diagrams/datamodel_6.png)
+![Datamodel diagram](diagrams/datamodel_9.png)
 
 - #### Parse Fio Broker csv reports into Java object reflecting Fio Broker transaction structure
 ````
