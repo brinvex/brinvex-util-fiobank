@@ -492,20 +492,6 @@ public class FioBrokerTransactionMapper {
             Currency countryCcy = country == null ? null : country.getCcy();
 
             if (nextCountry == null) {
-                if (Country.DE.equals(country)) {
-                    if (symbol.equals(nextSymbol)) {
-                        /*
-                        //Linde delisting from XETRA
-                        01.03.2023 00:00;Nákup;LIN;LIN - Reorganization;Transformácia;;vyúčtovaný;0;LINDE PLC;01.03.2023;
-                        01.03.2023 00:00;Predaj;LIN*;LIN - Reorganization;Transformácia;;vyúčtovaný;0;LINDE PLC;01.03.2023;
-                         */
-                        if (String.format("%s - Reorganization", symbol).equals(text)) {
-                            nextCountry = Country.US;
-                        }
-                    }
-                }
-            }
-            if (nextCountry == null) {
                 nextCountry = country;
             }
 

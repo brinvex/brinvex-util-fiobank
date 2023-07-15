@@ -114,10 +114,6 @@
     </dependencyManagement>
 
     <build>
-        <pluginManagement>
-            <plugins>
-            </plugins>
-        </pluginManagement>
 
         <plugins>
             <!-- https://stackoverflow.com/questions/36970384/surefire-is-not-picking-up-junit-5-tests -->
