@@ -40,6 +40,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -146,8 +147,10 @@ public class FioBankServiceImpl implements FioBankService {
         String accountNumber = rawTranList.getAccountNumber();
         LocalDate periodFrom = rawTranList.getPeriodFrom();
         LocalDate periodTo = rawTranList.getPeriodTo();
+        Set<String> ptfOldTranIds;
         if (ptf == null) {
             ptf = ptfManager.initPortfolio(accountNumber, periodFrom, periodTo);
+            ptfOldTranIds = new HashSet<>();
         } else {
             if (!accountNumber.equals(ptf.getAccountNumber())) {
                 throw new FiobankServiceException(format("Unexpected multiple accounts: %s, %s",
@@ -163,8 +166,7 @@ public class FioBankServiceImpl implements FioBankService {
             if (periodTo.isAfter(ptf.getPeriodTo())) {
                 ptf.setPeriodTo(periodTo);
             }
-            Set<String> ptfTranIds = ptf.getTransactions().stream().map(Transaction::getId).collect(Collectors.toSet());
-            rawTrans.removeIf(t -> ptfTranIds.contains(t.getId()));
+            ptfOldTranIds = ptf.getTransactions().stream().map(Transaction::getId).collect(Collectors.toSet());
         }
 
         List<Transaction> ptfTrans = ptf.getTransactions();
@@ -213,6 +215,9 @@ public class FioBankServiceImpl implements FioBankService {
                         netValue = grossValue.add(tax);
                         i++;
                     }
+                }
+                if (ptfOldTranIds.contains(id)) {
+                    continue;
                 }
 
                 Transaction newTran = new Transaction();
