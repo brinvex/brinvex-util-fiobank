@@ -49,6 +49,7 @@ import java.util.stream.Stream;
 
 import static com.brinvex.util.fiobank.impl.util.ValidationUtil.assertTrue;
 import static java.lang.String.format;
+import static java.util.function.Function.identity;
 
 public class FioBrokerServiceImpl implements FioBrokerService {
 
@@ -200,6 +201,7 @@ public class FioBrokerServiceImpl implements FioBrokerService {
         return processTransactionStatements(ptf, statementContentStream);
     }
 
+
     @Override
     public Map<LocalDate, PortfolioValue> getPortfolioValues(Collection<Path> portfolioStatementPaths) {
         Stream<String> statementContentStream = portfolioStatementPaths
@@ -209,8 +211,30 @@ public class FioBrokerServiceImpl implements FioBrokerService {
     }
 
     @Override
+    public Map<LocalDate, PortfolioValue> getPortfolioValues(
+            Collection<PortfolioValue> oldPtfValues,
+            Collection<Path> portfolioStatementPaths
+    ) {
+        Stream<String> statementContentStream = portfolioStatementPaths
+                .stream()
+                .map(filePath -> IOUtil.readTextFileContent(filePath, LazyHolder.DEFAULT_CHARSET, StandardCharsets.UTF_8));
+        return getPortfolioValues(oldPtfValues, statementContentStream);
+    }
+
+    @Override
     public Map<LocalDate, PortfolioValue> getPortfolioValues(Stream<String> portfolioStatementContents) {
+        return getPortfolioValues(null, portfolioStatementContents);
+    }
+
+    @Override
+    public Map<LocalDate, PortfolioValue> getPortfolioValues(
+            Collection<PortfolioValue> oldPtfValues,
+            Stream<String> portfolioStatementContents
+    ) {
         TreeMap<LocalDate, PortfolioValue> results = new TreeMap<>();
+        if (oldPtfValues != null) {
+            results.putAll(oldPtfValues.stream().collect(Collectors.toMap(PortfolioValue::getDay, identity())));
+        }
         portfolioStatementContents.forEach(c -> {
             PortfolioValue ptfValue = brokerStatementParser.parsePortfolioStatement(c);
             LocalDate day = ptfValue.getDay();

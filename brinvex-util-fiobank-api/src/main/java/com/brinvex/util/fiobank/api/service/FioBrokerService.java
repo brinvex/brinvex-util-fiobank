@@ -46,6 +46,10 @@ public interface FioBrokerService {
 
     Map<LocalDate, PortfolioValue> getPortfolioValues(Stream<String> portfolioStatementContents);
 
+    Map<LocalDate, PortfolioValue> getPortfolioValues(Collection<PortfolioValue> oldPtfValues, Stream<String> portfolioStatementContents);
+
     Map<LocalDate, PortfolioValue> getPortfolioValues(Collection<Path> portfolioStatementPaths);
+
+    Map<LocalDate, PortfolioValue> getPortfolioValues(Collection<PortfolioValue> oldPtfValues, Collection<Path> portfolioStatementPaths);
 
 }
