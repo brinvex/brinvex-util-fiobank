@@ -16,10 +16,13 @@
 package com.brinvex.util.fiobank.api.service;
 
 import com.brinvex.util.fiobank.api.model.Portfolio;
+import com.brinvex.util.fiobank.api.model.PortfolioValue;
 import com.brinvex.util.fiobank.api.model.RawBrokerTransactionList;
 
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -29,16 +32,20 @@ import java.util.stream.Stream;
  */
 public interface FioBrokerService {
 
-    RawBrokerTransactionList parseStatements(Stream<String> statementContents);
+    RawBrokerTransactionList parseTransactionStatements(Stream<String> transactionStatementContents);
 
-    RawBrokerTransactionList parseStatements(Collection<Path> statementFilePaths);
+    RawBrokerTransactionList parseTransactionStatements(Collection<Path> transactionStatementFilePaths);
 
-    Portfolio processStatements(Stream<String> statementContents);
+    Portfolio processTransactionStatements(Stream<String> transactionStatementContents);
 
-    Portfolio processStatements(Collection<Path> statementFilePaths);
+    Portfolio processTransactionStatements(Collection<Path> transactionStatementFilePaths);
 
-    Portfolio processStatements(Portfolio ptf, Stream<String> statementContents);
+    Portfolio processTransactionStatements(Portfolio ptf, Stream<String> transactionStatementContents);
 
-    Portfolio processStatements(Portfolio ptf, Collection<Path> statementFilePaths);
+    Portfolio processTransactionStatements(Portfolio ptf, Collection<Path> transactionStatementFilePaths);
+
+    Map<LocalDate, PortfolioValue> getPortfolioValues(Stream<String> portfolioStatementContents);
+
+    Map<LocalDate, PortfolioValue> getPortfolioValues(Collection<Path> portfolioStatementPaths);
 
 }

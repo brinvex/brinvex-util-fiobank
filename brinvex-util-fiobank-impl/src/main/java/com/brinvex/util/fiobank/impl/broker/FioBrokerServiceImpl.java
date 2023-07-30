@@ -16,7 +16,9 @@
 package com.brinvex.util.fiobank.impl.broker;
 
 import com.brinvex.util.fiobank.api.model.Country;
+import com.brinvex.util.fiobank.api.model.Currency;
 import com.brinvex.util.fiobank.api.model.Portfolio;
+import com.brinvex.util.fiobank.api.model.PortfolioValue;
 import com.brinvex.util.fiobank.api.model.RawBrokerTransaction;
 import com.brinvex.util.fiobank.api.model.RawBrokerTransactionList;
 import com.brinvex.util.fiobank.api.model.Transaction;
@@ -25,6 +27,7 @@ import com.brinvex.util.fiobank.api.service.exception.FiobankServiceException;
 import com.brinvex.util.fiobank.impl.broker.parser.BrokerStatementParser;
 import com.brinvex.util.fiobank.impl.util.IOUtil;
 
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -37,7 +40,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,8 +63,8 @@ public class FioBrokerServiceImpl implements FioBrokerService {
     protected final FioBrokerTransactionMapper transactionMapper = new FioBrokerTransactionMapper();
 
     @Override
-    public RawBrokerTransactionList parseStatements(Collection<Path> statementFilePaths) {
-        return parseStatements(statementFilePaths
+    public RawBrokerTransactionList parseTransactionStatements(Collection<Path> transactionStatementFilePaths) {
+        return parseTransactionStatements(transactionStatementFilePaths
                 .stream()
                 .map(filePath -> IOUtil.readTextFileContent(filePath, LazyHolder.DEFAULT_CHARSET, StandardCharsets.UTF_8))
         );
@@ -67,9 +72,9 @@ public class FioBrokerServiceImpl implements FioBrokerService {
 
     @SuppressWarnings("DuplicatedCode")
     @Override
-    public RawBrokerTransactionList parseStatements(Stream<String> statementContents) {
-        List<RawBrokerTransactionList> rawTranLists = statementContents
-                .map(brokerStatementParser::parseStatement)
+    public RawBrokerTransactionList parseTransactionStatements(Stream<String> transactionStatementContents) {
+        List<RawBrokerTransactionList> rawTranLists = transactionStatementContents
+                .map(brokerStatementParser::parseTrasnsactionStatement)
                 .sorted(Comparator.comparing(RawBrokerTransactionList::getPeriodFrom).thenComparing(RawBrokerTransactionList::getPeriodTo))
                 .collect(Collectors.toList());
 
@@ -135,8 +140,8 @@ public class FioBrokerServiceImpl implements FioBrokerService {
 
     @Override
     @SuppressWarnings("DuplicatedCode")
-    public Portfolio processStatements(Portfolio ptf, Stream<String> statementContents) {
-        RawBrokerTransactionList rawTranList = parseStatements(statementContents);
+    public Portfolio processTransactionStatements(Portfolio ptf, Stream<String> transactionStatementContents) {
+        RawBrokerTransactionList rawTranList = parseTransactionStatements(transactionStatementContents);
         List<RawBrokerTransaction> rawTrans = rawTranList.getTransactions();
 
         String accountNumber = rawTranList.getAccountNumber();
@@ -188,24 +193,52 @@ public class FioBrokerServiceImpl implements FioBrokerService {
     }
 
     @Override
-    public Portfolio processStatements(Portfolio ptf, Collection<Path> statementFilePaths) {
-        Stream<String> statementContentStream = statementFilePaths
+    public Portfolio processTransactionStatements(Portfolio ptf, Collection<Path> transactionStatementFilePaths) {
+        Stream<String> statementContentStream = transactionStatementFilePaths
                 .stream()
                 .map(filePath -> IOUtil.readTextFileContent(filePath, LazyHolder.DEFAULT_CHARSET, StandardCharsets.UTF_8));
-        return processStatements(ptf, statementContentStream);
+        return processTransactionStatements(ptf, statementContentStream);
     }
 
     @Override
-    public Portfolio processStatements(Collection<Path> statementFilePaths) {
-        Stream<String> statementContentStream = statementFilePaths
+    public Map<LocalDate, PortfolioValue> getPortfolioValues(Collection<Path> portfolioStatementPaths) {
+        Stream<String> statementContentStream = portfolioStatementPaths
                 .stream()
                 .map(filePath -> IOUtil.readTextFileContent(filePath, LazyHolder.DEFAULT_CHARSET, StandardCharsets.UTF_8));
-        return processStatements(statementContentStream);
+        return getPortfolioValues(statementContentStream);
     }
 
     @Override
-    public Portfolio processStatements(Stream<String> statementContents) {
-        return processStatements(null, statementContents);
+    public Map<LocalDate, PortfolioValue> getPortfolioValues(Stream<String> portfolioStatementContents) {
+        TreeMap<LocalDate, PortfolioValue> results = new TreeMap<>();
+        portfolioStatementContents.forEach(c -> {
+            PortfolioValue ptfValue = brokerStatementParser.parsePortfolioStatement(c);
+            LocalDate day = ptfValue.getDay();
+            PortfolioValue oldPtfValue = results.get(day);
+            if (oldPtfValue == null) {
+                results.put(day, ptfValue);
+            } else {
+                if (!ptfValue.getCurrency().equals(oldPtfValue.getCurrency())
+                    || ptfValue.getTotalValue().compareTo(oldPtfValue.getTotalValue()) != 0) {
+                    throw new FiobankServiceException(String.format("Different data: %s oldPtfValue=%s ptfValue=%s",
+                            day, oldPtfValue, ptfValue));
+                }
+            }
+        });
+        return results;
+    }
+
+    @Override
+    public Portfolio processTransactionStatements(Collection<Path> transactionStatementFilePaths) {
+        Stream<String> statementContentStream = transactionStatementFilePaths
+                .stream()
+                .map(filePath -> IOUtil.readTextFileContent(filePath, LazyHolder.DEFAULT_CHARSET, StandardCharsets.UTF_8));
+        return processTransactionStatements(statementContentStream);
+    }
+
+    @Override
+    public Portfolio processTransactionStatements(Stream<String> transactionStatementContents) {
+        return processTransactionStatements(null, transactionStatementContents);
     }
 
     protected Object rawTransactionKey(RawBrokerTransaction tran) {

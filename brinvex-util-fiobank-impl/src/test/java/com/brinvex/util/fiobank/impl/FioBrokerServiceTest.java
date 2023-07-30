@@ -16,6 +16,7 @@
 package com.brinvex.util.fiobank.impl;
 
 import com.brinvex.util.fiobank.api.model.Portfolio;
+import com.brinvex.util.fiobank.api.model.PortfolioValue;
 import com.brinvex.util.fiobank.api.model.Position;
 import com.brinvex.util.fiobank.api.model.RawBrokerTransaction;
 import com.brinvex.util.fiobank.api.model.RawBrokerTransactionList;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -66,7 +68,7 @@ class FioBrokerServiceTest {
                 f.equals("Fio_Broker_Transactions_2022_B_SK.csv")
         );
         if (!testFilePaths.isEmpty()) {
-            brokerSvc.processStatements(testFilePaths);
+            brokerSvc.processTransactionStatements(testFilePaths);
         }
     }
 
@@ -89,7 +91,7 @@ class FioBrokerServiceTest {
             List<RawBrokerTransactionList> tranLists = testFilePaths
                     .stream()
                     .map(List::of)
-                    .map(brokerSvc::parseStatements)
+                    .map(brokerSvc::parseTransactionStatements)
                     .collect(Collectors.toList());
 
             if (tranLists.size() >= 2) {
@@ -110,9 +112,11 @@ class FioBrokerServiceTest {
 
     @Test
     void parseStatements_sort() {
-        List<Path> testFilePaths = testHelper.getTestFilePaths(fileName -> fileName.endsWith(".csv") && !fileName.contains("_B_"));
+        List<Path> testFilePaths = testHelper.getTestFilePaths(fileName ->
+                fileName.endsWith(".csv") && !fileName.contains("_B_") && !fileName.contains("Vyvoj")
+        );
         if (!testFilePaths.isEmpty()) {
-            RawBrokerTransactionList rawTranList = brokerSvc.parseStatements(testFilePaths);
+            RawBrokerTransactionList rawTranList = brokerSvc.parseTransactionStatements(testFilePaths);
             List<RawBrokerTransaction> rawTrans = rawTranList.getTransactions();
             List<RawBrokerTransaction> sortedTransactions = rawTrans
                     .stream()
@@ -134,10 +138,10 @@ class FioBrokerServiceTest {
         );
         if (!testFilePaths1.isEmpty() && !testFilePaths2.isEmpty()) {
 
-            RawBrokerTransactionList tranList1 = brokerSvc.parseStatements(testFilePaths1);
+            RawBrokerTransactionList tranList1 = brokerSvc.parseTransactionStatements(testFilePaths1);
 
             testFilePaths2.addAll(testFilePaths1);
-            RawBrokerTransactionList tranList2 = brokerSvc.parseStatements(testFilePaths2);
+            RawBrokerTransactionList tranList2 = brokerSvc.parseTransactionStatements(testFilePaths2);
 
             assertEquals(tranList1.getTransactions().size(), tranList2.getTransactions().size());
         }
@@ -165,9 +169,9 @@ class FioBrokerServiceTest {
         );
         int years = 4;
         if (testFilePathsSk.size() == years && testFilePathsCz.size() == years && testFilePathsEn.size() == years) {
-            Portfolio ptfEn = brokerSvc.processStatements(testFilePathsEn);
-            Portfolio ptfSk = brokerSvc.processStatements(testFilePathsSk);
-            Portfolio ptfCz = brokerSvc.processStatements(testFilePathsCz);
+            Portfolio ptfEn = brokerSvc.processTransactionStatements(testFilePathsEn);
+            Portfolio ptfSk = brokerSvc.processTransactionStatements(testFilePathsSk);
+            Portfolio ptfCz = brokerSvc.processTransactionStatements(testFilePathsCz);
 
             testHelper.assertJsonEquals(ptfEn, ptfCz);
             testHelper.assertJsonEquals(ptfEn, ptfSk);
@@ -184,7 +188,7 @@ class FioBrokerServiceTest {
         );
         Path ptfFilePath = testHelper.getTestFilePath(fileName -> fileName.endsWith("Fio_Broker_Portfolio_2019_2022.json"));
         if (!transFilePaths.isEmpty() && ptfFilePath != null) {
-            Portfolio ptf = brokerSvc.processStatements(transFilePaths);
+            Portfolio ptf = brokerSvc.processTransactionStatements(transFilePaths);
 
             Portfolio expectedPtf = testHelper.readFromJson(ptfFilePath, Portfolio.class);
 
@@ -211,12 +215,12 @@ class FioBrokerServiceTest {
                             || fileName.endsWith("Fio_Broker_Transactions_2022_SK.csv")
         ));
         if (!transFilePaths.isEmpty()) {
-            Portfolio ptf1 = brokerSvc.processStatements(transFilePaths);
+            Portfolio ptf1 = brokerSvc.processTransactionStatements(transFilePaths);
 
             Portfolio ptf2 = null;
             transFilePaths.sort(naturalOrder());
             for (Path transFilePath : transFilePaths) {
-                ptf2 = brokerSvc.processStatements(ptf2, List.of(transFilePath));
+                ptf2 = brokerSvc.processTransactionStatements(ptf2, List.of(transFilePath));
             }
 
             assertNotNull(ptf2);
@@ -256,10 +260,10 @@ class FioBrokerServiceTest {
                 fileName.endsWith("Fio_Broker_Transactions_2019_SK.csv")
         );
         if (!testFilePaths1.isEmpty() && !testFilePaths2.isEmpty()) {
-            Portfolio ptf1 = brokerSvc.processStatements(testFilePaths1);
+            Portfolio ptf1 = brokerSvc.processTransactionStatements(testFilePaths1);
 
             testFilePaths2.addAll(testFilePaths1);
-            Portfolio ptf2 = brokerSvc.processStatements(testFilePaths2);
+            Portfolio ptf2 = brokerSvc.processTransactionStatements(testFilePaths2);
 
             assertEquals(ptf1.getTransactions().size(), ptf2.getTransactions().size());
         }
@@ -270,7 +274,7 @@ class FioBrokerServiceTest {
         List<Path> testFilePaths1 = testHelper.getTestFilePaths(fileName ->
                 fileName.endsWith("Fio_Broker_Transactions_2019.csv"));
         if (!testFilePaths1.isEmpty()) {
-            Portfolio ptf1 = brokerSvc.processStatements(testFilePaths1);
+            Portfolio ptf1 = brokerSvc.processTransactionStatements(testFilePaths1);
 
             for (Transaction t : ptf1.getTransactions()) {
                 if (t.getType().equals(TransactionType.FEE)) {
@@ -296,7 +300,7 @@ class FioBrokerServiceTest {
                 && !fileName.contains("_B_")
         );
         if (!testFilePaths1.isEmpty()) {
-            Portfolio ptf1 = brokerSvc.processStatements(testFilePaths1);
+            Portfolio ptf1 = brokerSvc.processTransactionStatements(testFilePaths1);
 
             for (Transaction t : ptf1.getTransactions()) {
                 if (t.getType().equals(TransactionType.CASH_DIVIDEND)) {
@@ -322,7 +326,7 @@ class FioBrokerServiceTest {
                 && !fileName.contains("_B_")
         );
         if (!testFilePaths1.isEmpty()) {
-            Portfolio ptf1 = brokerSvc.processStatements(testFilePaths1);
+            Portfolio ptf1 = brokerSvc.processTransactionStatements(testFilePaths1);
 
             Map<String, Transaction> idToTrans = new LinkedHashMap<>();
             for (Transaction t : ptf1.getTransactions()) {
@@ -331,6 +335,17 @@ class FioBrokerServiceTest {
                 Transaction duplicate = idToTrans.put(id, t);
                 assertNull(duplicate);
             }
+        }
+    }
+
+    @Test
+    void processPtfStatements() {
+        List<Path> testFilePaths1 = testHelper.getTestFilePaths(
+                fileName -> fileName.contains("Portfolio-Vyvoj-30-07-2023.csv")
+        );
+        if (!testFilePaths1.isEmpty()) {
+            Map<LocalDate, PortfolioValue> ptfValue1 = brokerSvc.getPortfolioValues(testFilePaths1);
+            assertNotNull(ptfValue1);
         }
     }
 

@@ -15,14 +15,19 @@
  */
 package com.brinvex.util.fiobank.impl.broker.parser;
 
+import com.brinvex.util.fiobank.api.model.Currency;
 import com.brinvex.util.fiobank.api.model.Lang;
+import com.brinvex.util.fiobank.api.model.PortfolioValue;
 import com.brinvex.util.fiobank.api.model.RawBrokerTransaction;
 import com.brinvex.util.fiobank.api.model.RawBrokerTransactionList;
 import com.brinvex.util.fiobank.api.service.exception.FiobankServiceException;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -35,14 +40,42 @@ import java.util.stream.Collectors;
 public class BrokerStatementParser {
 
     private static class LazyHolder {
+        static final Pattern COLUMN_DELIMITER_PATTERN = Pattern.compile(";");
+        static final Pattern ACCOUNT_NUMBER_PATTERN = Pattern.compile(".*:\\s+(?<accountNumber>\\d+)\"");
+        static final Pattern PERIOD_PATTERN = Pattern.compile(".*:\\s+(?<periodFrom>\\d{1,2}\\.\\d{1,2}\\.\\d{4})\\s+-\\s+(?<periodTo>\\d{1,2}\\.\\d{1,2}\\.\\d{4})");
 
-        private static final Pattern COLUMN_DELIMITER_PATTERN = Pattern.compile(";");
+        static final DateTimeFormatter PERIOD_DATE_FORMAT = DateTimeFormatter.ofPattern("d.M.yyyy");
+    }
 
+    public PortfolioValue parsePortfolioStatement(String ptfStatementContent) {
+        List<String> lines = ptfStatementContent.lines().collect(Collectors.toList());
+        String line3 = lines.get(2);
+        Matcher matcher = LazyHolder.PERIOD_PATTERN.matcher(line3);
+        if (!matcher.find()) {
+            throw new FiobankServiceException(String.format("Could not parse period: '%s'", line3));
+        }
+        LocalDate periodTo = LocalDate.parse(matcher.group("periodTo"), LazyHolder.PERIOD_DATE_FORMAT);
+
+        Collections.reverse(lines);
+        String lastLine = lines
+                .stream()
+                .dropWhile(String::isBlank)
+                .findFirst()
+                .orElseThrow();
+        String[] parts = lastLine.split(";");
+        Currency ccy = Currency.valueOf(parts[0].substring(parts[0].length() - 4, parts[0].length() - 1));
+        BigDecimal totalValue = new BigDecimal(parts[10].replace(',', '.').replace(" ", ""));
+
+        PortfolioValue ptfValue = new PortfolioValue();
+        ptfValue.setDay(periodTo);
+        ptfValue.setCurrency(ccy);
+        ptfValue.setTotalValue(totalValue);
+        return ptfValue;
     }
 
     @SuppressWarnings("SpellCheckingInspection")
-    public RawBrokerTransactionList parseStatement(String statementContent) {
-        List<String> lines = statementContent
+    public RawBrokerTransactionList parseTrasnsactionStatement(String transStatementContent) {
+        List<String> lines = transStatementContent
                 .lines()
                 .map(String::trim)
                 .collect(Collectors.toList());
@@ -63,8 +96,7 @@ public class BrokerStatementParser {
             try {
 
                 if (accountNumber == null) {
-                    Pattern pattern = Pattern.compile(".*:\\s+(?<accountNumber>\\d+)\"");
-                    Matcher matcher = pattern.matcher(line);
+                    Matcher matcher = LazyHolder.ACCOUNT_NUMBER_PATTERN.matcher(line);
                     if (!matcher.find()) {
                         throw new FiobankServiceException(String.format("%s - Could not parse account number: '%s'", i + 1, line));
                     }
@@ -83,14 +115,12 @@ public class BrokerStatementParser {
                     continue;
                 }
                 if (periodFrom == null || periodTo == null) {
-                    Pattern pattern = Pattern.compile(".*:\\s+(?<periodFrom>\\d{1,2}\\.\\d{1,2}\\.\\d{4})\\s+-\\s+(?<periodTo>\\d{1,2}\\.\\d{1,2}\\.\\d{4})");
-                    Matcher matcher = pattern.matcher(line);
+                    Matcher matcher = LazyHolder.PERIOD_PATTERN.matcher(line);
                     if (!matcher.find()) {
                         throw new FiobankServiceException(String.format("%s - Could not parse period: '%s'", i + 1, line));
                     }
-                    DateTimeFormatter df = DateTimeFormatter.ofPattern("d.M.yyyy");
-                    periodFrom = LocalDate.parse(matcher.group("periodFrom"), df);
-                    periodTo = LocalDate.parse(matcher.group("periodTo"), df);
+                    periodFrom = LocalDate.parse(matcher.group("periodFrom"), LazyHolder.PERIOD_DATE_FORMAT);
+                    periodTo = LocalDate.parse(matcher.group("periodTo"), LazyHolder.PERIOD_DATE_FORMAT);
                     continue;
                 }
 
