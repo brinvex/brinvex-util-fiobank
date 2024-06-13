@@ -12,12 +12,12 @@ No transitive dependencies are required during compilation or at runtime.
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-fiobank-api</artifactId>
-    <version>2.2.0</version>
+    <version>2.2.1</version>
 </dependency>
 <dependency>
     <groupId>com.brinvex.util</groupId>
     <artifactId>brinvex-util-fiobank-impl</artifactId>
-    <version>2.2.0</version>
+    <version>2.2.1</version>
     <scope>runtime</scope>
 </dependency>
 ````

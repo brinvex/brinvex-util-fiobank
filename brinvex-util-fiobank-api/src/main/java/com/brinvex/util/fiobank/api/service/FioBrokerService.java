@@ -19,6 +19,7 @@ import com.brinvex.util.fiobank.api.model.Portfolio;
 import com.brinvex.util.fiobank.api.model.PortfolioValue;
 import com.brinvex.util.fiobank.api.model.RawBrokerTransactionList;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -51,5 +52,7 @@ public interface FioBrokerService {
     Map<LocalDate, PortfolioValue> getPortfolioValues(Collection<Path> portfolioStatementPaths);
 
     Map<LocalDate, PortfolioValue> getPortfolioValues(Collection<PortfolioValue> oldPtfValues, Collection<Path> portfolioStatementPaths);
+
+    Charset getStatmentDefaultCharset();
 
 }

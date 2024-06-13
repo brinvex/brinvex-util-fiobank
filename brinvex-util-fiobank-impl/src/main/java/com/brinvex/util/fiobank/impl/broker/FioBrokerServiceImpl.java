@@ -222,6 +222,11 @@ public class FioBrokerServiceImpl implements FioBrokerService {
     }
 
     @Override
+    public Charset getStatmentDefaultCharset() {
+        return LazyHolder.DEFAULT_CHARSET;
+    }
+
+    @Override
     public Map<LocalDate, PortfolioValue> getPortfolioValues(Stream<String> portfolioStatementContents) {
         return getPortfolioValues(null, portfolioStatementContents);
     }
